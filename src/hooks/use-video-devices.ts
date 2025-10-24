@@ -14,7 +14,7 @@ export const useVideoDevices = () => {
                 );
                 setDevices(videoDevices);
                 if (videoDevices.length > 0) {
-                    setSelectedCameraId(videoDevices[0].deviceId);
+                    setSelectedCameraId(videoDevices[videoDevices.length -1].deviceId);
                 }
             } catch (error) {
                 console.error("Error enumerating devices:", error);
