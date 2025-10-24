@@ -1,71 +1,198 @@
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
 
+// ============================================
+// 📘 GET: Fetch All Events with Filters
+// ============================================
 export async function GET(req: Request) {
     try {
-        const events = await prisma.event.findMany({include:{
-            eventType: true
-        }});
-        return NextResponse.json({ success: true, events }, { status: 201 });
-    } catch (error: any) {
-        console.error("Error fetching events:", error);
+        const { searchParams } = new URL(req.url);
+
+        // Get query parameters
+        const type = searchParams.get("type") || "all";
+        const status = searchParams.get("status") || "0";
+        const sortBy = searchParams.get("sortBy") || "date-desc";
+        const count = parseInt(searchParams.get("count") || "20");
+        const search = searchParams.get("search") || "";
+
+        // Build where clause
+        const where: any = {};
+
+        // Filter by type
+        if (type !== "all") where.eventTypeId = type;
+
+        // Filter by status
+        if (status !== "0") where.status = parseInt(status);
+
+        if (search.trim()) {
+            where.OR = [
+                {
+                    name: { contains: search },
+                },
+                {
+                    description: { contains: search },
+                },
+                {
+                    location: { contains: search },
+                },
+                {
+                    eventType: {
+                        is: {
+                            name: {
+                                contains: search,
+                            },
+                        },
+                    },
+                },
+            ];
+        }
+
+        let orderBy: any = {};
+        switch (sortBy) {
+            case "date-asc":
+                orderBy = { eventDate: "asc" };
+                break;
+            case "date-desc":
+                orderBy = { eventDate: "desc" };
+                break;
+            case "name-asc":
+                orderBy = { name: "asc" };
+                break;
+            case "name-desc":
+                orderBy = { name: "desc" };
+                break;
+            default:
+                orderBy = { eventDate: "desc" };
+        }
+
+        const events = await prisma.event.findMany({
+            where,
+            include: {
+                eventType: true,
+                eventSessions: true,
+            },
+            orderBy,
+            take: count,
+        });
+
         return NextResponse.json(
-            { error: "Failed to fetch events", details: error.message },
+            {
+                success: true,
+                message: events.length
+                    ? "Events fetched successfully."
+                    : "No events found.",
+                count: events.length,
+                filters: {
+                    type,
+                    status,
+                    sortBy,
+                },
+                timestamp: new Date().toISOString(),
+                events,
+            },
+            { status: 200 }
+        );
+    } catch (error: any) {
+        console.error("❌ Error fetching events:", error);
+
+        return NextResponse.json(
+            {
+                success: false,
+                message: "An unexpected error occurred while fetching events.",
+                details: error.message,
+            },
             { status: 500 }
         );
     }
 }
+
+// ============================================
+// 📘 POST: Create a New Event
+// ============================================
 export async function POST(req: Request) {
     try {
-        // Parse request body
         const body = await req.json();
         const {
             name,
             description,
-            startTime,
-            endTime,
+            location,
             eventTypeId,
-            createdById,
+            eventDate,
+            status,
+            eventSessions,
         } = body;
-
-        // Basic validation
-        if (!name || !startTime) {
+        console.log(body);
+        if (!name || name.trim() === "") {
             return NextResponse.json(
                 {
-                    error: "Missing required fields (name, startTime, createdById)",
+                    success: false,
+                    message: "Event name is required.",
+                    timestamp: new Date().toISOString(),
                 },
                 { status: 400 }
             );
         }
-
-        // Create event in Prisma
+        if (
+            !eventSessions ||
+            !Array.isArray(eventSessions) ||
+            eventSessions.length === 0
+        ) {
+            return NextResponse.json(
+                {
+                    success: false,
+                    message: "At least one event session is required.",
+                    timestamp: new Date().toISOString(),
+                },
+                { status: 400 }
+            );
+        }
         const newEvent = await prisma.event.create({
             data: {
                 name,
                 description,
-                startTime: new Date(startTime),
-                endTime: endTime ? new Date(endTime) : null,
-                eventTypeId,
-                createdById,
+                eventTypeId: eventTypeId || null,
+                location,
+                eventDate,
+                status: parseInt(status) ?? 1,
+                eventSessions: {
+                    create: eventSessions.map((session: any) => ({
+                        type: parseInt(session.type),
+                        startTime: session.startTime,
+                        endTime: session.endTime,
+                        requiresTimeOut: parseInt(session.requiresTimeOut),
+                        allowEarlyIn: parseInt(session.allowEarlyTimeIn),
+                        allowEarlyOut: parseInt(session.allowEarlyTimeOut),
+                        gracePeriod: parseInt(session.gracePeriod) || 40,
+                    })),
+                },
             },
             include: {
-                createdBy: {
-                    select: { id: true, name: true, email: true },
-                },
-                eventType: {
-                    select: { id: true, name: true },
+                eventType: true,
+                eventSessions: {
+                    orderBy: { startTime: "asc" },
                 },
             },
         });
-
+        console.log("New event created:", newEvent);
         return NextResponse.json(
-            { success: true, event: newEvent },
+            {
+                success: true,
+                message: "Event created successfully.",
+                timestamp: new Date().toISOString(),
+                newEvent: newEvent,
+            },
             { status: 201 }
         );
     } catch (error: any) {
-        console.error("Error creating event:", error);
+        console.error("❌ Error creating event:", error);
+
         return NextResponse.json(
-            { error: "Failed to create event", details: error.message },
+            {
+                success: false,
+                message: "Failed to create event due to an internal error.",
+                details: error.message,
+                timestamp: new Date().toISOString(),
+            },
             { status: 500 }
         );
     }

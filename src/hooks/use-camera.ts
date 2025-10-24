@@ -1,12 +1,15 @@
-import { RefObject, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
-interface CameraProps {
-    videoRef: RefObject<HTMLVideoElement | null>;
-    canvasRef: RefObject<HTMLCanvasElement | null>;
-    streamRef: RefObject<MediaStream | null>;
-}
-export const useCamera = ({ videoRef, canvasRef, streamRef }: CameraProps) => {
+export const useFaceCamera = () => {
+    const [cameraError, setCameraError] = useState<string | null>(null);
+    const [environment, setEnvironment] = useState<"user" | "environment">(
+        "user"
+    );
+    const videoRef = useRef<HTMLVideoElement>(null);
+    const canvasRef = useRef<HTMLCanvasElement>(null);
+    const streamRef = useRef<MediaStream | null>(null);
+
     const [isCameraLoading, setIsCameraLoading] = useState(false);
     const [isCameraOn, setIsCameraOn] = useState(false);
     const startCamera = async (deviceId?: string) => {
@@ -17,8 +20,9 @@ export const useCamera = ({ videoRef, canvasRef, streamRef }: CameraProps) => {
                     width: { ideal: 1280 },
                     height: { ideal: 720 },
                     ...(deviceId
-                        ? { deviceId: { exact: deviceId } }
-                        : { facingMode: "user" }),
+                        ? { deviceId: { exact: deviceId },
+                            facingMode: environment }
+                        : { facingMode: environment  }),
                 },
                 audio: false,
             };
@@ -33,12 +37,14 @@ export const useCamera = ({ videoRef, canvasRef, streamRef }: CameraProps) => {
             }
         } catch (error) {
             console.error("Camera error:", error);
+            setCameraError(
+                "Failed to access camera. Please check permissions."
+            );
             toast.error("Failed to access camera. Please check permissions.");
             setIsCameraOn(false);
         } finally {
             setIsCameraLoading(false);
         }
-        setIsCameraOn(true);
     };
     const stopCamera = () => {
         // Stop all tracks in the stream
@@ -69,11 +75,18 @@ export const useCamera = ({ videoRef, canvasRef, streamRef }: CameraProps) => {
         }
         setIsCameraOn(false);
     };
+    
     return {
+        videoRef,
+        canvasRef,
+        streamRef,
         startCamera,
         stopCamera,
         isCameraLoading,
         isCameraOn,
         setIsCameraOn,
+        cameraError,
+        environment,
+        setEnvironment,
     };
 };

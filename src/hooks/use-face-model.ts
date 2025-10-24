@@ -1,3 +1,4 @@
+"use client";
 import { useEffect, useState } from "react";
 import * as faceapi from "face-api.js";
 import { ensureTensorFlowReady } from "@/lib/tensorflow-init";

@@ -1,9 +1,11 @@
+import { AttendanceStatus } from "@/components/detect/detect-parent-panel";
 import * as faceapi from "face-api.js";
+import { stat } from "fs";
 
 export interface User {
     id: string;
     name: string;
-    faceImages?: {
+    faceImages: {
         descriptor: number[];
     };
 }
@@ -13,12 +15,17 @@ export interface MatchResult {
     user: User | null;
     distance?: number;
 }
+// Cache for FaceMatcher to avoid rebuilding on every frame
+let faceMatcher: faceapi.FaceMatcher | null = null;
+let cachedUsers: User[] | null = null;
+let matchThreshold = 0.6;
 
-export function matchFaceWithUsers(
-    descriptor: Float32Array,
-    users: User[],
-    threshold = 0.6
-): MatchResult {
+export function updateFaceMatcherCache(users: User[], threshold: number) {
+    // Only rebuild if users changed or threshold changed
+    if (cachedUsers === users && matchThreshold === threshold) {
+        return;
+    }
+
     const labeledDescriptors = users
         .filter((u) => u.faceImages?.descriptor)
         .map((u) => {
@@ -28,11 +35,27 @@ export function matchFaceWithUsers(
         });
 
     if (labeledDescriptors.length === 0) {
+        faceMatcher = null;
+    } else {
+        faceMatcher = new faceapi.FaceMatcher(labeledDescriptors, threshold);
+    }
+
+    cachedUsers = users;
+    matchThreshold = threshold;
+}
+
+export function matchFaceWithUsers(
+    descriptor: Float32Array,
+    users: User[],
+    threshold = 0.6
+): MatchResult {
+    updateFaceMatcherCache(users, threshold);
+
+    if (!faceMatcher) {
         return { isMatch: false, user: null };
     }
 
-    const matcher = new faceapi.FaceMatcher(labeledDescriptors, threshold);
-    const bestMatch = matcher.findBestMatch(descriptor);
+    const bestMatch = faceMatcher.findBestMatch(descriptor);
     const isMatch = bestMatch.label !== "unknown";
 
     if (isMatch) {
@@ -47,61 +70,110 @@ export function matchFaceWithUsers(
     return { isMatch: false, user: null };
 }
 
-/**
- * Draw a bounding box and optional label on canvas
- */
 export interface DrawFaceBoxOptions {
     isMatch: boolean;
     label?: string;
-    hasAttended?: boolean;
+    userStatus?: AttendanceStatus;
+    confidence?: string;
+    cooldownSeconds?: number;
 }
+
+function getStatusInfo(status?: AttendanceStatus): {
+    color: string;
+    textColor: string;
+    label: string;
+    icon: string;
+} {
+    switch (status) {
+        case AttendanceStatus.UNKNOWN:
+            return {
+                color: "#dc2626",
+                textColor: "#ffffff",
+                label: "",
+                icon: "→",
+            };
+        case AttendanceStatus.TIME_IN:
+            return {
+                color: "#059669",
+                textColor: "#ffffff",
+                label: "Time In",
+                icon: "→",
+            };
+        case AttendanceStatus.ALREADY_TIME_IN:
+            return {
+                color: "#059669",
+                textColor: "#ffffff",
+                label: "Already Time In",
+                icon: "→",
+            };
+        case AttendanceStatus.TIME_OUT:
+            return {
+                color: "#2563eb",
+                textColor: "#ffffff",
+                label: "Time Out",
+                icon: "←",
+            };
+        case AttendanceStatus.ALREADY_TIME_OUT:
+            return {
+                color: "#2563eb",
+                textColor: "#ffffff",
+                label: "Already Time Out",
+                icon: "←",
+            };
+        case AttendanceStatus.COMPLETED:
+            return {
+                color: "#f59e0b",
+                textColor: "#ffffff",
+                label: "Completed",
+                icon: "⏱",
+            };
+        default:
+            return {
+                color: "#dc2626",
+                textColor: "#ffffff",
+                label: "Failed to recognize",
+                icon: "?",
+            };
+    }
+}
+
 export function drawFaceBox(
     ctx: CanvasRenderingContext2D,
     box: { x: number; y: number; width: number; height: number },
     options: DrawFaceBoxOptions
 ) {
-    const { isMatch, label, hasAttended } = options;
+    const { isMatch, label, userStatus, cooldownSeconds } = options;
+    const statusInfo = getStatusInfo(userStatus);
+    const strokeColor = isMatch ? statusInfo.color : "#dc2626";
+    const strokeWidth = 2.5;
 
-    if (hasAttended) {
-        ctx.strokeStyle = "#10b981"; // green for attended
-        ctx.fillStyle = "#10b981";
-    } else if (isMatch) {
-        ctx.strokeStyle = "#3b82f6"; // blue for matched
-        ctx.fillStyle = "#3b82f6";
-    } else {
-        ctx.strokeStyle = "#ef4444"; // red for unmatched
-        ctx.fillStyle = "#ef4444";
-    }
-
-    ctx.lineWidth = 3;
-
-    // Draw the bounding box
+    ctx.strokeStyle = strokeColor;
+    ctx.lineWidth = strokeWidth;
     ctx.strokeRect(box.x, box.y, box.width, box.height);
 
-    if (label || hasAttended) {
-        const padding = 8;
-        const fontSize = 16;
-        ctx.font = `bold ${fontSize}px sans-serif`;
+    if (label) {
+        const padding = 10;
+        const fontSize = 13;
+        ctx.font = `600 ${fontSize}px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif`;
 
-        // Prepare text
-        let displayText = label || "Unknown";
-        if (hasAttended) {
-            displayText += " ✓";
+        let displayText = label;
+        if (userStatus !== undefined && statusInfo.label !== "") {
+            displayText += ` • ${statusInfo.label}`;
         }
 
-        const textWidth = ctx.measureText(displayText).width;
-        const textHeight = fontSize;
+        const textMetrics = ctx.measureText(displayText);
+        const textWidth = textMetrics.width;
+        const textHeight = fontSize + 2;
 
-        // Draw background for text
-        const bgX = box.x;
-        const bgY = box.y - textHeight - padding * 2;
+        const bgX = Math.max(0, box.x);
+        const bgY = Math.max(0, box.y - textHeight - padding * 2);
         const bgWidth = textWidth + padding * 2;
         const bgHeight = textHeight + padding * 2;
 
+        ctx.fillStyle = statusInfo.color;
         ctx.fillRect(bgX, bgY, bgWidth, bgHeight);
 
-        // Draw text
-        ctx.fillStyle = "#ffffff";
+        ctx.fillStyle = statusInfo.textColor;
         ctx.fillText(
             displayText,
             bgX + padding,
@@ -109,30 +181,52 @@ export function drawFaceBox(
         );
     }
 
-    if (hasAttended) {
-        const badgeSize = 24;
-        const badgeX = box.x + box.width - badgeSize - 8;
-        const badgeY = box.y + 8;
+    if (cooldownSeconds !== undefined && cooldownSeconds > 0) {
+        const padding = 8;
+        const fontSize = 12;
+        const cooldownText = `Cooldown: ${cooldownSeconds}s`;
 
-        // Draw green circle badge
-        ctx.fillStyle = "#10b981";
-        ctx.beginPath();
-        ctx.arc(
-            badgeX + badgeSize / 2,
-            badgeY + badgeSize / 2,
-            badgeSize / 2,
-            0,
-            Math.PI * 2
+        ctx.font = `600 ${fontSize}px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif`;
+        const textMetrics = ctx.measureText(cooldownText);
+        const textWidth = textMetrics.width;
+        const textHeight = fontSize + 2;
+
+        const bgX = box.x + box.width - textWidth - padding * 2 - 8;
+        const bgY = box.y + 8;
+        const bgWidth = textWidth + padding * 2;
+        const bgHeight = textHeight + padding * 2;
+
+        ctx.fillStyle = "#f59e0b";
+        ctx.fillRect(bgX, bgY, bgWidth, bgHeight);
+
+        ctx.fillStyle = "#ffffff";
+        ctx.fillText(
+            cooldownText,
+            bgX + padding,
+            bgY + textHeight + padding / 2
         );
-        ctx.fill();
+        return;
+    }
 
-        // Draw checkmark
-        ctx.strokeStyle = "#ffffff";
-        ctx.lineWidth = 2;
-        ctx.beginPath();
-        ctx.moveTo(badgeX + 6, badgeY + 12);
-        ctx.lineTo(badgeX + 10, badgeY + 16);
-        ctx.lineTo(badgeX + 18, badgeY + 8);
-        ctx.stroke();
+    if (userStatus !== undefined) {
+        const padding = 6;
+        const fontSize = 11;
+        const statusText = statusInfo.label;
+
+        ctx.font = `600 ${fontSize}px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif`;
+        const textMetrics = ctx.measureText(statusText);
+        const textWidth = textMetrics.width;
+        const textHeight = fontSize + 2;
+
+        const bgX = box.x + box.width - textWidth - padding * 2 - 8;
+        const bgY = box.y + 8;
+        const bgWidth = textWidth + padding * 2;
+        const bgHeight = textHeight + padding * 2;
+
+        ctx.fillStyle = statusInfo.color;
+        ctx.fillRect(bgX, bgY, bgWidth, bgHeight);
+
+        ctx.fillStyle = statusInfo.textColor;
+        ctx.fillText(statusText, bgX + padding, bgY + textHeight + padding / 2);
     }
 }
