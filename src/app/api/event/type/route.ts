@@ -1,14 +1,14 @@
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
 
-export async function GET(req: Request) {
+export async function GET() {
     try {
         const eventTypes = await prisma.eventType.findMany();
         return NextResponse.json({ success: true,eventTypes }, { status: 200 });
-    } catch (error: any) {
+    } catch (error) {
         console.error("Error fetching event types:", error);
         return NextResponse.json(
-            { error: "Failed to fetch event types", details: error.message },
+            { error: "Failed to fetch event types", details: error },
             { status: 500 }
         );
     }
@@ -44,10 +44,10 @@ export async function POST(req: Request) {
         });
 
         return NextResponse.json({ success: true, eventType }, { status: 201 });
-    } catch (error: any) {
+    } catch (error) {
         console.error("Error creating EventType:", error);
         return NextResponse.json(
-            { error: "Failed to create event type", details: error.message },
+            { error: "Failed to create event type", details: error },
             { status: 500 }
         );
     }

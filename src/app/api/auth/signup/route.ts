@@ -129,7 +129,7 @@ export async function POST(req: Request) {
 
         // Send response (exclude password)
         const { password: _, ...userWithoutPassword } = result;
-
+        console.log(_)
         return NextResponse.json(
             {
                 message: "User registered successfully",

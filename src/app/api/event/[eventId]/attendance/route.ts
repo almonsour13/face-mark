@@ -1,13 +1,12 @@
 import { prisma } from "@/lib/prisma";
 import { convertToBase64 } from "@/utils/convet-to-base64";
-import { NextRequest, NextResponse } from "next/server";
-import { parse } from "path";
+import { Prisma } from "@prisma/client";
+import { NextResponse } from "next/server";
 
-interface Params {
-    params: { eventId: string };
-}
-
-export async function GET(req: NextRequest, { params }: Params) {
+export async function GET(
+    req: Request,
+    { params }: { params: Promise<{ eventId: string }> }
+) {
     try {
         const { eventId } = await params;
         const { searchParams } = new URL(req.url);
@@ -25,7 +24,7 @@ export async function GET(req: NextRequest, { params }: Params) {
                 { status: 400 }
             );
         }
-        let where: any = { eventId: eventId };
+        let where: Prisma.AttendanceWhereInput = { eventId: eventId };
 
         if (sessionType !== "0")
             where.session = { type: parseInt(sessionType) };
@@ -111,10 +110,10 @@ export async function GET(req: NextRequest, { params }: Params) {
             success: true,
             attendance: updatedAttendanceData,
         });
-    } catch (error: any) {
+    } catch (error) {
         console.error("Error fetching attendance:", error);
         return NextResponse.json(
-            { error: "Failed to fetch attendance", details: error.message },
+            { error: "Failed to fetch attendance", details: error },
             { status: 500 }
         );
     }

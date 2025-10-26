@@ -45,10 +45,10 @@ export async function GET() {
             { success: true, faces: updatedFaces },
             { status: 200 }
         );
-    } catch (error: any) {
+    } catch (error) {
         console.error("Error fetching faces:", error);
         return NextResponse.json(
-            { error: "Failed to fetch faces", details: error.message },
+            { error: "Failed to fetch faces", details: error },
             { status: 500 }
         );
     }

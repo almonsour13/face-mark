@@ -6,7 +6,7 @@ export async function GET() {
     try {
         const courses = await prisma.course.findMany();
         return NextResponse.json({ success: true, courses }, { status: 200 });
-    } catch (error: any) {
+    } catch (error) {
         console.error("Error fetching courses:", error);
         return NextResponse.json(
             { success: false, error: "Failed to fetch courses" },

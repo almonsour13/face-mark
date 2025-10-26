@@ -39,7 +39,7 @@ export const useFaceModel = () => {
 
                 // Step 2: Load face-api.js models sequentially
                 console.log("🔄 Loading face detection models...");
-                await faceapi.nets.tinyFaceDetector.loadFromUri("/models"),
+                await faceapi.nets.tinyFaceDetector.loadFromUri("/models");
                 console.log("✅ Tiny Face Detector loaded");
 
                 await faceapi.nets.ssdMobilenetv1.loadFromUri("/models");

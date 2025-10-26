@@ -1,13 +1,22 @@
 import { prisma } from "@/lib/prisma";
-import { NextRequest, NextResponse } from "next/server";
+import { convertToBase64 } from "@/utils/convet-to-base64";
+import { Prisma } from "@prisma/client";
+import { NextResponse } from "next/server";
 
-interface Params {
-    params: { eventId: string };
-}
-
-export async function GET(req: NextRequest, { params }: Params) {
+export async function GET(
+    req: Request,
+    { params }: { params: Promise<{ eventId: string }> }
+) {
     try {
         const { eventId } = await params;
+        const { searchParams } = new URL(req.url);
+
+        // Get query parameters
+        const sessionType = searchParams.get("sessionType") || "0";
+        const level = searchParams.get("level") || "all";
+        const attendanceType = searchParams.get("attendanceType") || "0";
+        const search = searchParams.get("search") || "";
+        const count = parseInt(searchParams.get("count") || "20");
 
         if (!eventId) {
             return NextResponse.json(
@@ -15,16 +24,91 @@ export async function GET(req: NextRequest, { params }: Params) {
                 { status: 400 }
             );
         }
-        const event = await prisma.event.findUnique({
-            where: { id: eventId },
-            include: { eventType: true, eventSessions: true },
-        });
+        let where: Prisma.AttendanceWhereInput = { eventId: eventId };
 
-        if (!event) {
+        if (sessionType !== "0")
+            where.session = { type: parseInt(sessionType) };
+        if (level !== "all")
+            where = {
+                ...where,
+                user: {
+                    studentDetails: {
+                        level: {
+                            name: level,
+                        },
+                    },
+                },
+            };
+        if (attendanceType !== "0") where.type = parseInt(attendanceType);
+
+        if (search.trim()) {
+            where.OR = [
+                {
+                    user: {
+                        name: { contains: search },
+                    },
+                },
+                {
+                    user: {
+                        studentDetails: {
+                            studentId: { contains: search },
+                        },
+                    },
+                },
+            ];
         }
+        const attendance = await prisma.attendance.findMany({
+            where,
+            include: {
+                user: {
+                    select: {
+                        id: true,
+                        name: true,
+                        studentDetails: {
+                            select: {
+                                studentId: true,
+                                level: {
+                                    select: {
+                                        name: true,
+                                    },
+                                },
+                                course: {
+                                    select: {
+                                        name: true,
+                                        code: true,
+                                    },
+                                },
+                            },
+                        },
+                        faceImages: {
+                            select: {
+                                imageUrl: true,
+                            },
+                        },
+                    },
+                },
+                session: {
+                    select: {
+                        type: true,
+                    },
+                },
+            },
+            take: count,
+        });
+        const updatedAttendanceData = attendance.map((att) => ({
+            ...att,
+            user: {
+                ...att.user,
+                faceImages: {
+                    imageUrl: att.user.faceImages
+                        ? convertToBase64(att.user.faceImages.imageUrl)
+                        : null,
+                },
+            },
+        }));
         return NextResponse.json({
             success: true,
-            event,
+            attendance: updatedAttendanceData,
         });
     } catch (error) {
         console.error("Error fetching attendance:", error);

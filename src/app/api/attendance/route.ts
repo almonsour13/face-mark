@@ -11,8 +11,9 @@ function parseTimeString(
     if (!timeStr) return new Date();
     const baseDate = new Date(eventDate);
     const [time, modifier] = timeStr.split(" ");
-    let [hours, minutes] = time.split(":").map(Number);
-
+    const splittedTime = time.split(":").map(Number);
+    let hours = splittedTime[0];
+    const minutes = splittedTime[1];
     if (modifier.toUpperCase() === "PM" && hours < 12) hours += 12;
     if (modifier.toUpperCase() === "AM" && hours === 12) hours = 0;
 

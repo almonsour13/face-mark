@@ -1,9 +1,10 @@
 import AppLayout from "@/components/layout/app-layout";
+import { Suspense } from "react";
 
 export default function Layout({ children }: { children: React.ReactNode }) {
     return (
         <AppLayout>
-            {children}
+            <Suspense>{children}</Suspense>
         </AppLayout>
-    )
+    );
 }

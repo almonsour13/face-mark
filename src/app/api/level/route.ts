@@ -5,8 +5,11 @@ export async function GET() {
     try {
         const levels = await prisma.level.findMany();
         return NextResponse.json({ success: true, levels }, { status: 200 });
-    } catch (error: any) {
-        return new Response(error.message, { status: 500 });
+    } catch (error) {
+        return NextResponse.json(
+            { success: false, error: "Failed to fetch levels"+error },
+            { status: 500 }
+        );
     }
 }
 export async function POST(req: Request) {
@@ -39,7 +42,10 @@ export async function POST(req: Request) {
             { success: true, level: newLevel, message: "Level Sucessfully Added" },
             { status: 200 }
         );
-    } catch (error: any) {
-        return new Response(error.message, { status: 500 });
+    } catch (error) {
+        return NextResponse.json(
+            { success: false, error: "Failed to add level"+error },
+            { status: 500 }
+        );
     }
 }

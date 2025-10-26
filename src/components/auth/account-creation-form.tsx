@@ -2,7 +2,7 @@
 import { Card } from "@/components/ui/card";
 import { useFaceModel } from "@/hooks/use-face-model";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import PersonalInformationSteps from "./steps/personal-info-step";
 import StudentDetailsSteps from "./steps/student-details-step";
 import { FaceCaptureStep } from "./steps/upload-image";
@@ -18,49 +18,41 @@ export type FormData = {
 };
 
 const TOTAL_STEPS = 4;
+
 export default function AccountCreationForm() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const queryStep = Number(searchParams.get("s")) || 1;
-    const [currentStep, setCurrentStep] = useState(1);
-    const [direction, setDirection] = useState<"forward" | "backward">(
-        "forward"
-    );
+
+    const [currentStep, setCurrentStep] = useState(queryStep);
+    const [direction, setDirection] = useState<"forward" | "backward">("forward");
     const [formData, setFormData] = useState<FormData>({
-        name: "SAlida Monsour",
-        email: "monsour@gmail",
-        password: "monsour13",
-        studentId: "2021-3482",
+        name: "",
+        email: "",
+        password: "",
+        studentId: "",
         courseId: "",
         levelId: "",
         faceImage: null,
     });
 
     useFaceModel();
-    
-    useEffect(() => {
-        if (queryStep) {
-            setCurrentStep(queryStep);
-        }
-    }, [queryStep]);
+
+    const goToStep = (step: number, dir: "forward" | "backward") => {
+        setDirection(dir);
+        setCurrentStep(step);
+        router.replace(`?s=${step}`);
+    };
 
     const handleNext = () => {
-        if (currentStep < TOTAL_STEPS) {
-            const nextStep = currentStep + 1;
-            setDirection("forward");
-            setCurrentStep(nextStep);
-            router.replace(`?s=${nextStep}`); // ✅ update query param
-        }
+        if (currentStep < TOTAL_STEPS) goToStep(currentStep + 1, "forward");
     };
+
     const handleBack = () => {
-        if (currentStep > 1) {
-            const prevStep = currentStep - 1;
-            setDirection("backward");
-            setCurrentStep(prevStep);
-            router.replace(`?s=${prevStep}`); // ✅ update query param
-        }
+        if (currentStep > 1) goToStep(currentStep - 1, "backward");
     };
-    const handleInputChange = (name: string, value: string) => {
+
+     const handleInputChange = (name: string, value: string) => {
         setFormData((prevFormData) => ({
             ...prevFormData,
             [name]: value,

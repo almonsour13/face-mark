@@ -62,7 +62,7 @@ export default function DetectParentPanel() {
     const eventId = useParams().eventId as string;
     const { setTheme, theme } = useTheme();
     const { eventDetails } = useEventDetailsStore();
-    
+
     // const [detectedFacesData, setDetectedFacesData] = useState<Map<string, DetectedFacesData>>(
     //      new Map()
     // );
@@ -75,13 +75,17 @@ export default function DetectParentPanel() {
         resizedDetections,
         detections,
     } = useFaceDetectionContext();
-    
+
     const animationFrameRef = useRef<number | null>(null);
     const isDetectingRef = useRef(false);
     const attendanceTrackerRef = useRef<Map<string, UserTracker>>(new Map());
-    
-    const [cooldownTimers, setCooldownTimers] = useState<Map<string, number>>(new Map());
-    const [lastUserAttended, setLastUserAttended] = useState<Attendance | null>(null);
+
+    const [cooldownTimers, setCooldownTimers] = useState<Map<string, number>>(
+        new Map()
+    );
+    const [lastUserAttended, setLastUserAttended] = useState<Attendance | null>(
+        null
+    );
     const { addEventAttendance, eventAttendance } = useEventAttendanceStore();
     const [message, setMessage] = useState<string | null>(null);
 
@@ -96,13 +100,15 @@ export default function DetectParentPanel() {
 
     // 🚀 Create label cache to avoid repeated string concatenation
     const labelCache = useRef<Map<string, string>>(new Map());
-    
+
     const getUserLabel = useCallback((user: Face) => {
         const cacheKey = `${user.id}-${user.name}-${user.code}-${user.level}`;
         if (labelCache.current.has(cacheKey)) {
             return labelCache.current.get(cacheKey)!;
         }
-        const label = `${user.name} - ${user.code} - ${levelsValue[user.level]}`;
+        const label = `${user.name} - ${user.code} - ${
+            levelsValue[user.level]
+        }`;
         labelCache.current.set(cacheKey, label);
         return label;
     }, []);
@@ -115,16 +121,120 @@ export default function DetectParentPanel() {
         }
     }, [isFacesLoading, facesData, setFacesLoading, setFaces]);
 
+    // 🚀 Memoize handleAttendanceCreation to prevent recreating on every render
+    const handleAttendanceCreation = useCallback(
+        async (userId: string) => {
+            const now = Date.now();
+            const lastRecorded = attendanceTrackerRef.current.get(userId);
+
+            if (
+                lastRecorded &&
+                now - lastRecorded.timeStamp < ATTENDANCE_COOLDOWN_MS
+            ) {
+                return;
+            }
+
+            const result = await createAttendance({
+                userId,
+                eventId,
+                sessionType: selectedSessionType,
+                attendanceType: selectedAttendanceType,
+            });
+
+            if (result.success) {
+                const attendanceRecord = result.attendance;
+                if (attendanceRecord) {
+                    addEventAttendance(attendanceRecord);
+                    setLastUserAttended(attendanceRecord);
+                    toast.success(result.message);
+                }
+
+                const status =
+                    result.type === AttendanceStatusType.TIME_IN
+                        ? AttendanceStatus.TIME_IN
+                        : AttendanceStatus.TIME_OUT;
+
+                attendanceTrackerRef.current.set(userId, {
+                    status,
+                    timeStamp: now,
+                });
+                if (!result.message) return;
+                setMessage(result.message);
+            } else {
+                // 🚀 Simplified status handling with lookup table using string keys
+                const statusMap: Record<string, AttendanceStatus> = {
+                    "already-complete": AttendanceStatus.COMPLETED,
+                    "already-time-in": AttendanceStatus.ALREADY_TIME_IN,
+                    "already-time-out": AttendanceStatus.ALREADY_TIME_OUT,
+                    "too-early-in": AttendanceStatus.UNKNOWN,
+                    "no-time-in-found": AttendanceStatus.UNKNOWN,
+                    "too-early-out": AttendanceStatus.ALREADY_TIME_IN,
+                    "too-late-in": AttendanceStatus.TIME_IN,
+                    "too-late-out": AttendanceStatus.TIME_OUT,
+                    "time-in": AttendanceStatus.TIME_IN,
+                    "time-out": AttendanceStatus.TIME_OUT,
+                    "no-timeout-required": AttendanceStatus.UNKNOWN,
+                };
+                if (!result.type) {
+                    return;
+                }
+                const newStatus =
+                    statusMap[result.type] ??
+                    (lastRecorded?.status || AttendanceStatus.UNKNOWN);
+                attendanceTrackerRef.current.set(userId, {
+                    status: newStatus,
+                    timeStamp: now,
+                });
+
+                // 🚀 Show appropriate toast based on result type
+                const successTypes = [
+                    "already-complete",
+                    "already-time-in",
+                    "already-time-out",
+                ];
+                const warningTypes = [
+                    "too-early-in",
+                    "too-early-out",
+                    "too-late-in",
+                    "too-late-out",
+                    "no-time-in-found",
+                ];
+
+                if (successTypes.includes(result.type)) {
+                    toast.success(result.message);
+                } else if (warningTypes.includes(result.type)) {
+                    toast.warning(result.message);
+                } else {
+                    toast.error(result.message);
+                }
+
+                if (!result.message) return;
+                setMessage(result.message);
+            }
+        },
+        [
+            eventId,
+            selectedSessionType,
+            selectedAttendanceType,
+            addEventAttendance,
+        ]
+    );
     // 🚀 Optimize drawing with useMemo and reduce re-renders
     useEffect(() => {
-        if (!resizedDetections || !detections || !canvasRef.current || !memoizedFaces) return;
+        if (
+            !resizedDetections ||
+            !detections ||
+            !canvasRef.current ||
+            !memoizedFaces
+        )
+            return;
 
         const canvas = canvasRef.current;
         const ctx = canvas.getContext("2d");
         if (!ctx) return;
 
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        
+
         const now = Date.now();
         const newCooldownTimers = new Map(cooldownTimers);
 
@@ -145,15 +255,25 @@ export default function DetectParentPanel() {
 
             if (matchResult.isMatch && matchResult.user) {
                 handleAttendanceCreation(matchResult.user.id);
-                attendanceStatus = attendanceTrackerRef.current.get(matchResult.user.id)?.status ?? null;
+                attendanceStatus =
+                    attendanceTrackerRef.current.get(matchResult.user.id)
+                        ?.status ?? null;
 
-                const lastRecorded = attendanceTrackerRef.current.get(matchResult.user.id);
+                const lastRecorded = attendanceTrackerRef.current.get(
+                    matchResult.user.id
+                );
                 if (lastRecorded) {
                     const elapsed = now - lastRecorded.timeStamp;
-                    const remaining = Math.max(0, ATTENDANCE_COOLDOWN_MS - elapsed);
+                    const remaining = Math.max(
+                        0,
+                        ATTENDANCE_COOLDOWN_MS - elapsed
+                    );
                     if (remaining > 0) {
                         cooldownRemaining = Math.ceil(remaining / 1000);
-                        newCooldownTimers.set(matchResult.user.id, cooldownRemaining);
+                        newCooldownTimers.set(
+                            matchResult.user.id,
+                            cooldownRemaining
+                        );
                     } else {
                         newCooldownTimers.delete(matchResult.user.id);
                     }
@@ -162,16 +282,25 @@ export default function DetectParentPanel() {
 
             drawFaceBox(ctx, box, {
                 isMatch: matchResult.isMatch,
-                label: matchResult.isMatch && matchResult.user
-                    ? getUserLabel(matchResult.user)
-                    : "Failed to recognize",
+                label:
+                    matchResult.isMatch && matchResult.user
+                        ? getUserLabel(matchResult.user)
+                        : "Failed to recognize",
                 userStatus: attendanceStatus ?? undefined,
                 cooldownSeconds: cooldownRemaining,
             });
         }
 
         setCooldownTimers(newCooldownTimers);
-    }, [resizedDetections, memoizedFaces, getUserLabel, detections, canvasRef, cooldownTimers]);
+    }, [
+        resizedDetections,
+        memoizedFaces,
+        getUserLabel,
+        detections,
+        canvasRef,
+        cooldownTimers,
+        handleAttendanceCreation,
+    ]);
 
     useEffect(() => {
         if (eventAttendance.length > 0) {
@@ -188,10 +317,14 @@ export default function DetectParentPanel() {
                 let hasChanges = false;
 
                 for (const [userId] of prev.entries()) {
-                    const lastRecorded = attendanceTrackerRef.current.get(userId);
+                    const lastRecorded =
+                        attendanceTrackerRef.current.get(userId);
                     if (lastRecorded) {
                         const elapsed = now - lastRecorded.timeStamp;
-                        const remaining = Math.max(0, ATTENDANCE_COOLDOWN_MS - elapsed);
+                        const remaining = Math.max(
+                            0,
+                            ATTENDANCE_COOLDOWN_MS - elapsed
+                        );
                         if (remaining > 0) {
                             const newValue = Math.ceil(remaining / 1000);
                             if (prev.get(userId) !== newValue) {
@@ -210,75 +343,6 @@ export default function DetectParentPanel() {
 
         return () => clearInterval(cooldownInterval);
     }, []);
-
-    // 🚀 Memoize handleAttendanceCreation to prevent recreating on every render
-    const handleAttendanceCreation = useCallback(async (userId: string) => {
-        const now = Date.now();
-        const lastRecorded = attendanceTrackerRef.current.get(userId);
-        
-        if (lastRecorded && now - lastRecorded.timeStamp < ATTENDANCE_COOLDOWN_MS) {
-            return;
-        }
-
-        const result = await createAttendance({
-            userId,
-            eventId,
-            sessionType: selectedSessionType,
-            attendanceType: selectedAttendanceType,
-        });
-
-        if (result.success) {
-            const attendanceRecord = result.attendance;
-            if (attendanceRecord) {
-                addEventAttendance(attendanceRecord);
-                setLastUserAttended(attendanceRecord);
-                toast.success(result.message);
-            }
-
-            const status = result.type === AttendanceStatusType.TIME_IN
-                ? AttendanceStatus.TIME_IN
-                : AttendanceStatus.TIME_OUT;
-
-            attendanceTrackerRef.current.set(userId, { status, timeStamp: now });
-            if(!result.message) return
-            setMessage(result.message);
-        } else {
-            // 🚀 Simplified status handling with lookup table using string keys
-            const statusMap: Record<string, AttendanceStatus> = {
-                "already-complete": AttendanceStatus.COMPLETED,
-                "already-time-in": AttendanceStatus.ALREADY_TIME_IN,
-                "already-time-out": AttendanceStatus.ALREADY_TIME_OUT,
-                "too-early-in": AttendanceStatus.UNKNOWN,
-                "no-time-in-found": AttendanceStatus.UNKNOWN,
-                "too-early-out": AttendanceStatus.ALREADY_TIME_IN,
-                "too-late-in": AttendanceStatus.TIME_IN,
-                "too-late-out": AttendanceStatus.TIME_OUT,
-                "time-in": AttendanceStatus.TIME_IN,
-                "time-out": AttendanceStatus.TIME_OUT,
-                "no-timeout-required": AttendanceStatus.UNKNOWN,
-            };
-            if(!result.type) {
-                return
-            }
-            const newStatus = statusMap[result.type] ?? (lastRecorded?.status || AttendanceStatus.UNKNOWN);
-            attendanceTrackerRef.current.set(userId, { status: newStatus, timeStamp: now });
-
-            // 🚀 Show appropriate toast based on result type
-            const successTypes = ["already-complete", "already-time-in", "already-time-out"];
-            const warningTypes = ["too-early-in", "too-early-out", "too-late-in", "too-late-out", "no-time-in-found"];
-
-            if (successTypes.includes(result.type)) {
-                toast.success(result.message);
-            } else if (warningTypes.includes(result.type)) {
-                toast.warning(result.message);
-            } else {
-                toast.error(result.message);
-            }
-            
-            if(!result.message) return
-            setMessage(result.message);
-        }
-    }, [eventId, selectedSessionType, selectedAttendanceType, addEventAttendance]);
 
     const toggleCamera = useCallback(async () => {
         if (isCameraOn) {
@@ -306,7 +370,9 @@ export default function DetectParentPanel() {
                     <Button
                         variant="ghost"
                         size="icon"
-                        onClick={() => setTheme(theme === "light" ? "dark" : "light")}
+                        onClick={() =>
+                            setTheme(theme === "light" ? "dark" : "light")
+                        }
                     >
                         {theme === "light" ? (
                             <Moon className="h-5 w-5" />

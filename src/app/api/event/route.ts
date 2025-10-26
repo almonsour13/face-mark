@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { Prisma } from "@prisma/client";
 import { NextResponse } from "next/server";
 
 // ============================================
@@ -16,10 +17,10 @@ export async function GET(req: Request) {
         const search = searchParams.get("search") || "";
 
         // Build where clause
-        const where: any = {};
+        const where: Prisma.EventWhereInput = {};
 
         // Filter by type
-        if (type !== "all") where.eventTypeId = type;
+        // if (type !== "all") where.eventTypeId = parseInt(type);
 
         // Filter by status
         if (status !== "0") where.status = parseInt(status);
@@ -47,7 +48,7 @@ export async function GET(req: Request) {
             ];
         }
 
-        let orderBy: any = {};
+        let orderBy: Record<string, "asc" | "desc"> = {};
         switch (sortBy) {
             case "date-asc":
                 orderBy = { eventDate: "asc" };
@@ -92,14 +93,14 @@ export async function GET(req: Request) {
             },
             { status: 200 }
         );
-    } catch (error: any) {
+    } catch (error) {
         console.error("❌ Error fetching events:", error);
 
         return NextResponse.json(
             {
                 success: false,
                 message: "An unexpected error occurred while fetching events.",
-                details: error.message,
+                details: error,
             },
             { status: 500 }
         );

@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { Prisma } from "@prisma/client";
 import { NextResponse } from "next/server";
 
 export async function GET(req: Request) {
@@ -13,7 +14,7 @@ export async function GET(req: Request) {
         console.log("search:", search);
 
         // Build where clause
-        const where: any = {};
+        const where: Prisma.UserWhereInput = {};
 
         // Add studentDetails filters
         if (course && course !== "all") {
@@ -34,11 +35,11 @@ export async function GET(req: Request) {
         // Add search filters
         if (search.trim()) {
             where.OR = [
-                { name: { contains: search, mode: "insensitive" } },
-                { email: { contains: search, mode: "insensitive" } },
+                { name: { contains: search } },
+                { email: { contains: search, } },
                 {
                     studentDetails: {
-                        studentId: { contains: search, mode: "insensitive" },
+                        studentId: { contains: search},
                     },
                 },
             ];

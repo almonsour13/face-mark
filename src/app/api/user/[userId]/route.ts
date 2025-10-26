@@ -1,11 +1,10 @@
 import { prisma } from "@/lib/prisma";
 import { convertToBase64 } from "@/utils/convet-to-base64";
-import { NextRequest, NextResponse } from "next/server";
-interface Params {
-    params: { userId: string };
-}
-
-export async function GET(req: NextRequest, { params }: Params) {
+import { NextResponse } from "next/server";
+export async function GET(
+    req: Request,
+    { params }: { params: Promise<{ userId: string }> }
+) {
     try {
         const { userId } = await params;
 

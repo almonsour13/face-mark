@@ -5,6 +5,7 @@ import { useFaceModel } from "@/hooks/use-face-model";
 import * as faceapi from "face-api.js";
 import React, {
     createContext,
+    useCallback,
     useContext,
     useEffect,
     useRef,
@@ -104,7 +105,7 @@ export function FaceDetectionProvider({
 
     
 
-    const startDetection = () => {
+    const startDetection = useCallback(() => {
         if (
             !videoRef.current ||
             !canvasRef.current ||
@@ -155,7 +156,7 @@ export function FaceDetectionProvider({
             animationFrameRef.current = requestAnimationFrame(detectFaces);
         };
         detectFaces();
-    };
+    },[videoRef, canvasRef, isFaceModelLoaded, isCameraOn]);
 useEffect(() => {
         if ( isFaceModelLoaded && isCameraOn) {
             startDetection();

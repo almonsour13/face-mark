@@ -3,12 +3,11 @@
 import { useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 
-/**
- * A reusable hook that syncs multiple query params with their respective state.
- * Each param can have its own type.
- */
 export function useSyncQueryParams<
-    T extends Record<string, [any, React.Dispatch<React.SetStateAction<any>>]>
+    T extends Record<
+        string,
+        [string, React.Dispatch<React.SetStateAction<string>>]
+    >
 >({ params }: { params: T }) {
     const searchParams = useSearchParams();
 
@@ -20,6 +19,5 @@ export function useSyncQueryParams<
                 setValue(value);
             }
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [searchParams]);
+    }, [searchParams, params]);
 }
