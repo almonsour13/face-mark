@@ -11,18 +11,18 @@ export async function POST(req: Request) {
             name,
             email,
             password,
-            course,
-            year,
+            courseId,
+            levelId,
             studentId,
             faceImage,
             faceDescriptor,
-        } = await req.json(); 
+        } = await req.json();
 
         console.log("📝 Parsed request body:", {
             name,
             email,
-            course,
-            year,
+            courseId,
+            levelId,
             studentId,
             hasFaceImage: !!faceImage,
             hasFaceDescriptor: !!faceDescriptor,
@@ -37,7 +37,7 @@ export async function POST(req: Request) {
             );
         }
 
-        if (!studentId || !course || !year) {
+        if (!studentId || !levelId || !courseId) {
             console.log("⚠️ Missing student details");
             return NextResponse.json(
                 { message: "Student ID, course, and year are required" },
@@ -107,9 +107,9 @@ export async function POST(req: Request) {
             await tx.studentDetails.create({
                 data: {
                     userId: user.id,
-                    course,
-                    level: year,
                     studentId,
+                    levelId,
+                    courseId,
                 },
             });
 
@@ -137,12 +137,12 @@ export async function POST(req: Request) {
             },
             { status: 201 }
         );
-    } catch (error: any) {
+    } catch (error) {
         console.error("🔥 Error during registration:", error);
         return NextResponse.json(
             {
                 message: "Internal Server Error",
-                error: error.message || "Unknown error occurred",
+                error: error || "Unknown error occurred",
             },
             { status: 500 }
         );

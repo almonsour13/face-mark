@@ -1,13 +1,6 @@
 "use client";
 
-import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
-} from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
 import {
     DropdownMenu,
     DropdownMenuCheckboxItem,
@@ -21,25 +14,34 @@ import {
     DropdownMenuSubTrigger,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { useParams } from "next/navigation";
+import {
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
+} from "@/components/ui/table";
+import { levelsValue } from "@/constant";
 import { useEventAttendance } from "@/hooks/event/use-event-attendace";
-import { format } from "date-fns";
-import Image from "next/image";
+import { useDebounce } from "@/hooks/use-debounce";
+import { useSyncQueryParams } from "@/hooks/use-sync-query-params";
+import { useUpdateQueryParams } from "@/hooks/use-update-query-params";
 import { useEventAttendanceStore } from "@/store/use-event-attendace-store";
 import { eventSessionTypeValue } from "@/utils/event-utils";
-import { Badge } from "./ui/badge";
-import { useEffect, useMemo, useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "./ui/input";
-import { useDebounce } from "@/hooks/use-debounce";
+import { format } from "date-fns";
 import { Filter } from "lucide-react";
-import { parse } from "path";
+import Image from "next/image";
+import { useParams } from "next/navigation";
+import { useEffect, useMemo, useState } from "react";
+import { Badge } from "./ui/badge";
+import { Input } from "./ui/input";
 
 export default function EventAttendanceTable() {
     const eventId = useParams().eventId as string;
 
-    const [nextCursor, setNextCursor] = useState("");
-    const [count, setCount] = useState(20);
+    // const [nextCursor, setNextCursor] = useState("");
+    // const [count, setCount] = useState(20);
     const [search, setSearch] = useState("");
     const [sessionType, setSessionType] = useState("0");
     const [level, setLevel] = useState("all");
@@ -47,13 +49,29 @@ export default function EventAttendanceTable() {
 
     const debouncedSearch = useDebounce(search, 500);
 
+    useUpdateQueryParams(
+        ` /event/${eventId}`,
+        { search, sessionType, level, attendanceType },
+        { search: "", sessionType: "0", level: "all", attendanceType: "0" },
+        { replace: true }
+    );
+
+    useSyncQueryParams({
+        params: {
+            search: [search, setSearch],
+            sessionType: [sessionType, setSessionType],
+            level: [level, setLevel],
+            attendanceType: [attendanceType, setAttendanceType],
+        },
+    });
+
     const { data: eventAttendanceData, isLoading } = useEventAttendance({
         eventId,
         sessionType,
         level,
         attendanceType,
         search: debouncedSearch,
-        count,
+        count:20,
     });
 
     const { eventAttendance, setEventAttendance } = useEventAttendanceStore();
@@ -79,7 +97,9 @@ export default function EventAttendanceTable() {
     }, [eventAttendance]);
 
     const uniqueAttendanceType = useMemo(() => {
-        const attendanceTypes = eventAttendance.map((item) => item.type.toString());
+        const attendanceTypes = eventAttendance.map((item) =>
+            item.type.toString()
+        );
         return Array.from(new Set(attendanceTypes.filter(Boolean)));
     }, [eventAttendance]);
 
@@ -141,9 +161,7 @@ export default function EventAttendanceTable() {
                                             {uniqueAttendanceType.map(
                                                 (itemAttendanceType) => (
                                                     <DropdownMenuCheckboxItem
-                                                        key={
-                                                            itemAttendanceType
-                                                        }
+                                                        key={itemAttendanceType}
                                                         checked={
                                                             itemAttendanceType ===
                                                             attendanceType
@@ -235,15 +253,22 @@ export default function EventAttendanceTable() {
                                             {uniqueLevel &&
                                                 uniqueLevel.map((itemLevel) => (
                                                     <DropdownMenuCheckboxItem
-                                                        key={itemLevel}
+                                                        key={itemLevel.id}
                                                         checked={
-                                                            itemLevel === level
+                                                            itemLevel.name ===
+                                                            level
                                                         }
                                                         onCheckedChange={() =>
-                                                            setLevel(itemLevel)
+                                                            setLevel(
+                                                                itemLevel.name
+                                                            )
                                                         }
                                                     >
-                                                        {itemLevel}
+                                                        {
+                                                            levelsValue[
+                                                                itemLevel.name
+                                                            ]
+                                                        }
                                                     </DropdownMenuCheckboxItem>
                                                 ))}
                                         </DropdownMenuSubContent>
@@ -303,10 +328,18 @@ export default function EventAttendanceTable() {
                                         {attendance.user.name}
                                     </TableCell>
                                     <TableCell>
-                                        {attendance.user.studentDetails?.course}
+                                        {
+                                            attendance.user.studentDetails
+                                                ?.course.name
+                                        }
                                     </TableCell>
                                     <TableCell>
-                                        {attendance.user.studentDetails?.level}
+                                        {
+                                            levelsValue[
+                                                attendance.user.studentDetails
+                                                    ?.level.name
+                                            ]
+                                        }
                                     </TableCell>
                                     <TableCell>
                                         {attendance.session &&

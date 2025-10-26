@@ -6,14 +6,10 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table";
-import { useParams } from "next/navigation";
-import { useEventAttendance } from "@/hooks/event/use-event-attendace";
-import { format } from "date-fns";
-import Image from "next/image";
-import { useEventAttendanceStore } from "@/store/use-event-attendace-store";
-import { eventSessionTypeValue } from "@/utils/event-utils";
-import { Badge } from "./ui/badge";
 import { useUserAttendanceStore } from "@/store/use-user-attendance-store";
+import { eventSessionTypeValue } from "@/utils/event-utils";
+import { format } from "date-fns";
+import { Badge } from "./ui/badge";
 
 export default function UserAttendancesTable() {
     const { userAttendances, isUserAttendanceLoading } =

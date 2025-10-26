@@ -1,17 +1,14 @@
-"use client";
-
+import { Face } from "@/store/use-faces-store";
 import { useQuery } from "@tanstack/react-query";
-import { User } from "./use-users";
-
 interface Response {
     success: boolean;
-    userDetails: User;
+    faces: Face[];
 }
-export const useUserDetails = (userId:string) => {
+export const useFaces = () => {
     return useQuery<Response, Error>({
-        queryKey: ["usersDetails"],
+        queryKey: ["faces"],
         queryFn: async () => {
-            const response = await fetch(`/api/user/${userId}`);
+            const response = await fetch("/api/face");
             return await response.json();
         },
     });

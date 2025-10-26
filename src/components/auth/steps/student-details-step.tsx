@@ -1,22 +1,13 @@
 "use client";
-import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
-    Card,
     CardContent,
     CardDescription,
     CardHeader,
     CardTitle,
 } from "@/components/ui/card";
-import {
-    Field,
-    FieldDescription,
-    FieldGroup,
-    FieldLabel,
-} from "@/components/ui/field";
+import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { FormData } from "../account-creation-form";
-import { on } from "events";
 import {
     Select,
     SelectContent,
@@ -24,23 +15,14 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
-
-const courses = [
-    "Computer Science",
-    "Information Technology",
-    "Business Administration",
-    "Engineering",
-    "Education",
-    "Nursing",
-    "Psychology",
-    "Accountancy",
-];
-
-const years = ["1st Year", "2nd Year", "3rd Year", "4th Year", "5th Year"];
+import { levelsValue } from "@/constant";
+import { useCourses } from "@/hooks/use-courses";
+import { useLevel } from "@/hooks/use-level";
+import { FormData } from "../account-creation-form";
 
 interface PersonalInformationStepsProps {
     formData: FormData;
-    handleInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+    handleInputChange: (name: string, value: string) => void;
     onNext: () => void;
     onPrev: () => void;
 }
@@ -50,11 +32,13 @@ export default function StudentDetailsSteps({
     onNext,
     onPrev,
 }: PersonalInformationStepsProps) {
-    const isValid = formData.course && formData.studentId && formData.year;
+    const isValid = formData.courseId && formData.studentId && formData.levelId;
+    const { data: levelsData } = useLevel();
+    const { data: coursesData } = useCourses();
 
     return (
         <div className="w-full space-y-4">
-            <CardHeader  className="text-lg">
+            <CardHeader className="text-lg">
                 <CardTitle>Student Details</CardTitle>
                 <CardDescription>
                     Provide your academic information
@@ -70,34 +54,49 @@ export default function StudentDetailsSteps({
                             value={formData.studentId}
                             placeholder="Ex: 2025-2222"
                             required
-                            onChange={handleInputChange}
+                            onChange={(e) =>
+                                handleInputChange(e.target.name, e.target.value)
+                            }
                         />
                     </Field>
                     <Field className="gap-1">
                         <FieldLabel htmlFor="course">Course</FieldLabel>
-                        <Select value={formData.course}>
+                        <Select
+                            value={formData.courseId}
+                            onValueChange={(value) => {
+                                handleInputChange("courseId", value);
+                            }}
+                        >
                             <SelectTrigger className="bg-background border-input text-foreground">
                                 <SelectValue placeholder="Select your course" />
                             </SelectTrigger>
                             <SelectContent>
-                                {courses.map((course) => (
-                                    <SelectItem key={course} value={course}>
-                                        {course}
+                                {coursesData?.courses.map((course) => (
+                                    <SelectItem
+                                        key={course.id}
+                                        value={course.id}
+                                    >
+                                        {course.name} ({course.code})
                                     </SelectItem>
                                 ))}
                             </SelectContent>
                         </Select>
                     </Field>
                     <Field className="gap-1">
-                        <FieldLabel htmlFor="course">Course</FieldLabel>
-                        <Select value={formData.year}>
+                        <FieldLabel htmlFor="course">Level/Year:</FieldLabel>
+                        <Select
+                            value={formData.levelId}
+                            onValueChange={(value) => {
+                                handleInputChange("levelId", value);
+                            }}
+                        >
                             <SelectTrigger className="bg-background border-input text-foreground">
-                                <SelectValue placeholder="Select your year level" />
+                                <SelectValue placeholder="Select your year/level" />
                             </SelectTrigger>
                             <SelectContent>
-                                {years.map((year) => (
-                                    <SelectItem key={year} value={year}>
-                                        {year}
+                                {levelsData?.levels.map((level) => (
+                                    <SelectItem key={level.id} value={level.id}>
+                                        {levelsValue[level.name]}
                                     </SelectItem>
                                 ))}
                             </SelectContent>
@@ -108,7 +107,7 @@ export default function StudentDetailsSteps({
                             Back
                         </Button>
                         <Button
-                            // disabled={!isValid}
+                            disabled={!isValid}
                             className="w-auto"
                             onClick={onNext}
                         >

@@ -1,10 +1,11 @@
 "use client";
 
+import HeaderTitle from "@/components/nav-header-title";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { Card } from "@/components/ui/card";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import UserAttendanceDisplay from "@/components/user-attendance-display";
+import { levelsValue } from "@/constant";
 import { useUserDetailsStore } from "@/store/use-user-details-store";
 import { BookOpen, Layers, Mail } from "lucide-react";
 
@@ -34,11 +35,13 @@ export default function Page() {
         <div className="w-full min-h-screen bg-background">
             <div className="sticky top-0 z-50 border-b bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/60">
                 <div className="h-14 px-6 flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                        <SidebarTrigger />
-                        <h1 className="text-lg font-semibold truncate">
-                            {userDetails?.name || "User Details"}
-                        </h1>
+                    <div className="w-full mx-auto flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                            <SidebarTrigger />
+                            <HeaderTitle>
+                                {userDetails?.name || "User Details"}
+                            </HeaderTitle>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -133,7 +136,7 @@ export default function Page() {
                                                         {
                                                             userDetails
                                                                 .studentDetails
-                                                                .course
+                                                                .course.name
                                                         }
                                                     </p>
                                                 </div>
@@ -148,9 +151,11 @@ export default function Page() {
                                                     </p>
                                                     <p className="font-semibold text-foreground mt-1">
                                                         {
-                                                            userDetails
-                                                                .studentDetails
-                                                                .level
+                                                            levelsValue[
+                                                                userDetails
+                                                                    .studentDetails
+                                                                    .level.name
+                                                            ]
                                                         }
                                                     </p>
                                                 </div>

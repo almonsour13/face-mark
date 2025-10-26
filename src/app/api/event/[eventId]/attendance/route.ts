@@ -25,11 +25,21 @@ export async function GET(req: NextRequest, { params }: Params) {
                 { status: 400 }
             );
         }
-        const where: any = { eventId: eventId };
+        let where: any = { eventId: eventId };
 
         if (sessionType !== "0")
             where.session = { type: parseInt(sessionType) };
-        if (level !== "all") where.level = level;
+        if (level !== "all")
+            where = {
+                ...where,
+                user: {
+                    studentDetails: {
+                        level: {
+                            name: level,
+                        },
+                    },
+                },
+            };
         if (attendanceType !== "0") where.type = parseInt(attendanceType);
 
         if (search.trim()) {
@@ -55,7 +65,22 @@ export async function GET(req: NextRequest, { params }: Params) {
                     select: {
                         id: true,
                         name: true,
-                        studentDetails: true,
+                        studentDetails: {
+                            select: {
+                                studentId: true,
+                                level: {
+                                    select: {
+                                        name: true,
+                                    },
+                                },
+                                course: {
+                                    select: {
+                                        name: true,
+                                        code: true,
+                                    },
+                                },
+                            },
+                        },
                         faceImages: {
                             select: {
                                 imageUrl: true,

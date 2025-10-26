@@ -1,7 +1,6 @@
 "use client";
 
-import type React from "react";
-import { useEffect, useRef, useState } from "react";
+import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
     CardContent,
@@ -10,10 +9,11 @@ import {
     CardTitle,
 } from "@/components/ui/card";
 import { Field, FieldGroup } from "@/components/ui/field";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Camera, ImageIcon, ImagePlus, X } from "lucide-react";
-import { FormData } from "../account-creation-form";
 import { useSignUpUser } from "@/hooks/use-auth";
+import { ImagePlus, X } from "lucide-react";
+import type React from "react";
+import { useEffect, useRef, useState } from "react";
+import { FormData } from "../account-creation-form";
 
 interface FaceCaptureStepProps {
     formData: FormData;
@@ -25,14 +25,12 @@ interface FaceCaptureStepProps {
 export function FaceCaptureStep({
     formData,
     setFormData,
-    onNext,
     onPrev,
 }: FaceCaptureStepProps) {
     const [imagePreview, setImagePreview] = useState<string | null>(null);
-    const [imageFile, setImageFile] = useState<File | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
-    const { mutate: signUp, isPending: isLoading, error } = useSignUpUser();
+    const { mutate: signUp, isPending: isLoading } = useSignUpUser();
 
     useEffect(() => {
         if (formData.faceImage) {
@@ -48,7 +46,9 @@ export function FaceCaptureStep({
     const handleSubmit = async () => {
         try {
             signUp(formData);
-        } catch (error) {}
+        } catch (error) {
+            console.error("Error signing up:", error);
+        }
     };
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
@@ -59,14 +59,12 @@ export function FaceCaptureStep({
                 setImagePreview(result);
             };
             reader.readAsDataURL(file);
-            setImageFile(file);
             setFormData({ ...formData, faceImage: file });
         }
     };
 
     const handleRemoveImage = () => {
         setImagePreview(null);
-        setImageFile(null);
     };
 
     const isValid = formData.faceImage !== null;
@@ -149,8 +147,12 @@ export function FaceCaptureStep({
                         >
                             Back
                         </Button>
-                        <Button disabled={!isValid} className="w-auto" onClick={handleSubmit}>
-                            Submit
+                        <Button
+                            disabled={!isValid}
+                            className="w-auto"
+                            onClick={handleSubmit}
+                        >
+                            {isLoading ? "Loading..." : "Submit"}
                         </Button>
                     </div>
                 </FieldGroup>

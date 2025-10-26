@@ -1,4 +1,3 @@
-import { SessionType } from "@/components/dialog/create-event-dialog";
 export const eventStatusValue: Record<number, string> = {
     1: "Draft",
     2: "Upcoming",

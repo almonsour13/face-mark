@@ -1,6 +1,5 @@
-import { useEffect, useState } from "react";
-import { Event } from "./use-events";
 import { useQuery } from "@tanstack/react-query";
+import { Event } from "./use-events";
 interface Response{
     sucess: boolean;
     event: Event;

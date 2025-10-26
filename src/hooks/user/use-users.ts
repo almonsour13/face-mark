@@ -1,11 +1,19 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
 
+interface Course{
+    id: string;
+    name: string;
+    code: string;
+}
+interface Level{
+    id: string;
+    name: string;
+}
 interface StudentDetails {
-    course: string;
-    level: string;
+    course: Course;
+    level: Level;
     studentId: string;
 }
 interface FaceImage {
@@ -27,11 +35,23 @@ interface Response {
     success: boolean;
     users: User[];
 }
-export const useUsers = () => {
-    return useQuery({
-        queryKey: ["users"],
+interface UseUserProps {
+    course?: string;
+    level?: string;
+    search?: string;
+    count?: number;
+}
+export const useUsers = ({course, level, search, count }: UseUserProps) => {
+    return useQuery<Response, Error>({
+        queryKey: ["users", course, level, search, count],
         queryFn: async () => {
-            const response = await fetch("/api/user");
+             const params = new URLSearchParams({
+                ...count && { count: count.toString() },
+                ...(course && { course }),
+                ...(level && { level }),
+                ...(search && { search }), // Only add if search has value
+            });
+            const response = await fetch(`/api/user?${params.toString()}`);
             return await response.json();
         },
     });

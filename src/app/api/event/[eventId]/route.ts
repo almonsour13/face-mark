@@ -26,10 +26,10 @@ export async function GET(req: NextRequest, { params }: Params) {
             success: true,
             event,
         });
-    } catch (error: any) {
+    } catch (error) {
         console.error("Error fetching attendance:", error);
         return NextResponse.json(
-            { error: "Failed to fetch attendance", details: error.message },
+            { error: "Failed to fetch attendance", details: error },
             { status: 500 }
         );
     }

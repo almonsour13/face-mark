@@ -1,4 +1,4 @@
-import { FaceImage, StudentDetails } from "@prisma/client";
+import { StudentDetails } from "@prisma/client";
 
 interface UserType {
     id: string;
@@ -8,15 +8,7 @@ interface UserType {
     } | null;
     studentDetails: StudentDetails | null;
 }
-interface Attendance {
-    userId: string;
-    id: string;
-    status: number;
-    type: number;
-    createdAt: Date;
-    user: UserType | null;
-}
-export const updatedUserAttendanceFaceImage = (attendance: Attendance) => {};
+
 export const convertToBase64 = (
     imageUrl: Uint8Array<ArrayBufferLike> | null
 ) => {

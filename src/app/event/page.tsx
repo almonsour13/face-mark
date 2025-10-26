@@ -1,20 +1,11 @@
 "use client";
 
 import CreateEventDialog from "@/components/dialog/create-event-dialog";
+import Header from "@/components/header";
+import HeaderTitle from "@/components/nav-header-title";
+import EventCardSkeleton from "@/components/skeleton/event-card-skeleton";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { useEvents } from "@/hooks/event/use-events";
-import { eventSessionTypeValue, eventStatusValue } from "@/utils/event-utils";
-import {
-    Calendar,
-    Clock,
-    MapPin,
-    MoreHorizontal,
-    Filter,
-    ArrowUpDown,
-} from "lucide-react";
-import Link from "next/link";
-import { format } from "date-fns";
 import {
     DropdownMenu,
     DropdownMenuCheckboxItem,
@@ -30,24 +21,52 @@ import {
     DropdownMenuSubTrigger,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { useEventStore } from "@/store/use-event-store";
-import { useDeferredValue, useEffect, useState } from "react";
+import { Input } from "@/components/ui/input";
+import { SidebarTrigger } from "@/components/ui/sidebar";
 import { eventStatus } from "@/constant";
 import { useEventTypes } from "@/hooks/event/use-event-type";
-import { Input } from "@/components/ui/input";
+import { useEvents } from "@/hooks/event/use-events";
 import { useDebounce } from "@/hooks/use-debounce";
-import EventCardSkeleton from "@/components/skeleton/event-card-skeleton";
+import { useSyncQueryParams } from "@/hooks/use-sync-query-params";
+import { useUpdateQueryParams } from "@/hooks/use-update-query-params";
+import { useEventStore } from "@/store/use-event-store";
+import { eventSessionTypeValue, eventStatusValue } from "@/utils/event-utils";
+import { format } from "date-fns";
+import {
+    ArrowUpDown,
+    Calendar,
+    Clock,
+    Filter,
+    MapPin,
+    MoreHorizontal,
+} from "lucide-react";
+import Link from "next/link";
+import { useEffect, useState } from "react";
 
+type SortByType = "date-asc" | "date-desc" | "name-asc" | "name-desc";
 export default function Page() {
     const [search, setSearch] = useState("");
     const [status, setStatus] = useState("0");
     const [type, setType] = useState("all");
-    const [sortBy, setSortBy] = useState<
-        "date-asc" | "date-desc" | "name-asc" | "name-desc"
-    >("date-desc");
+    const [sortBy, setSortBy] = useState<SortByType>("date-desc");
 
     const debouncedSearch = useDebounce(search, 500);
 
+    useUpdateQueryParams(
+        "/event",
+        { search, status, type, sortBy },
+        { search: "", status: "0", type: "all", sortBy: "date-desc" },
+        { replace: true }
+    );
+
+    useSyncQueryParams({
+        params: {
+            search: [search, setSearch],
+            status: [status, setStatus],
+            type: [type, setType],
+            sortBy: [sortBy, setSortBy],
+        },
+    });
     const { events, setEvents, setIsEventsLoading, isEventsLoading } =
         useEventStore();
 
@@ -66,20 +85,23 @@ export default function Page() {
             console.log("Events:", eventsData.events);
             setEvents(eventsData.events);
         }
-    }, [eventsData, isEventsLoading, setEvents, setIsEventsLoading]);
+    }, [eventsData, isEventsLoading, setEvents, setIsEventsLoading, isPending]);
 
     const hasActiveFilters = status !== "0" || type !== "all";
     const isSearching = search !== debouncedSearch;
 
     return (
-        <div className="w-full flex flex-col h-screen">
-            <div className="h-14 w-full px-4 flex items-center justify-between border-b shrink-0">
+        <div className="w-full flex flex-col min-h-screen relative">
+            <Header title="Event">
                 <div className="w-full mx-auto flex items-center justify-between">
-                    <h1 className="text-xl font-semibold">Event</h1>
+                    <div className="flex items-center gap-2">
+                        <SidebarTrigger />
+                        <HeaderTitle>Event</HeaderTitle>
+                    </div>
+                    <CreateEventDialog />
                 </div>
-                <CreateEventDialog />
-            </div>
-            <div className="p-4 md:p-6 flex flex-col gap-8">
+            </Header>
+            <div className="p-4 md:p-6 flex flex-col gap-4">
                 <div className="flex gap-2">
                     <Input
                         type="search"
@@ -89,7 +111,13 @@ export default function Page() {
                         onChange={(e) => setSearch(e.target.value)}
                     />
                     <DropdownMenu>
-                        <DropdownMenuTrigger asChild className={`${hasActiveFilters && "bg-primary/30 dark:bg-primary/30 "}`}>
+                        <DropdownMenuTrigger
+                            asChild
+                            className={`${
+                                hasActiveFilters &&
+                                "bg-primary/30 dark:bg-primary/30 "
+                            }`}
+                        >
                             <Button variant="outline" className={`relative `}>
                                 <Filter className="w-4 h-4" />
                                 Filter
@@ -226,7 +254,7 @@ export default function Page() {
                         ))}
                     </div>
                 ) : events.length > 0 ? (
-                    <div className="columns-1 md:columns-2 lg:columns-3 gap-4 space-y-4">
+                    <div className="columns-1 md:columns-2 lg:columns-3 gap-4">
                         {events.map((event) => (
                             <Link
                                 key={event.id}

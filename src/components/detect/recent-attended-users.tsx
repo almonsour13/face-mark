@@ -14,6 +14,7 @@ import { format } from "date-fns";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Attendance } from "@/hooks/event/use-event-attendace";
 import { Badge } from "../ui/badge";
+import { levelsValue } from "@/constant";
 
 interface AttendedUsersProps {
     attendance: Attendance[];
@@ -63,7 +64,7 @@ export default function RecentAttendedUsers({
     }
 
     return (
-        <div className="w-full">
+        <div className="w-full max-h-96">
             <ItemGroup className="gap-2">
                 <AnimatePresence mode="popLayout">
                     {reversedAttendance.map((attendance, index) => {
@@ -87,10 +88,10 @@ export default function RecentAttendedUsers({
                                     ease: [0.4, 0, 0.2, 1],
                                 }}
                             >
-                                <Item variant="outline" className="bg-muted p-3">
+                                <Item variant="outline" className="p-3">
                                     <ItemMedia
                                         variant="image"
-                                        className="h-16 w-16 overflow-hidden"
+                                        className="h-20 w-20 overflow-hidden"
                                     >
                                         <Image
                                             src={
@@ -106,23 +107,23 @@ export default function RecentAttendedUsers({
                                     </ItemMedia>
                                     <ItemContent className="">
                                         <ItemHeader>
-                                            <ItemTitle>{name}</ItemTitle>
+                                            <ItemTitle className="text-foreground truncate leading-tight">{name}</ItemTitle>
                                             <Badge
                                                 variant={
                                                     attendance.type === 1
                                                         ? "default"
                                                         : "destructive"
                                                 }
-                                                className="text-xs"
+                                                className="text-xs font-medium shrink-0"
                                             >
                                                 {attendance.type === 1
-                                                    ? "Time In"
-                                                    : "Time Out"}
+                                                    ? "In"
+                                                    : "Out"}
                                             </Badge>
                                         </ItemHeader>
 
                                         <div className="flex w-full items-center justify-between">
-                                            <ItemDescription className="text-xs">
+                                            <ItemDescription className="text-xs text-muted-foreground font-light">
                                                 {format(
                                                     attendance.createdAt,
                                                     "hh:mm aa"
@@ -130,12 +131,16 @@ export default function RecentAttendedUsers({
                                             </ItemDescription>
                                         </div>
                                         {(studentId || course || level) && (
-                                            <ItemDescription className="text-xs">
-                                                {[course, level]
+                                            <ItemDescription className="text-xs text-muted-foreground font-light">
+                                                {[
+                                                    course.name,
+                                                    levelsValue[level.name],
+                                                ]
                                                     .filter(Boolean)
                                                     .join(" • ")}
                                             </ItemDescription>
                                         )}
+                                        
                                     </ItemContent>
                                 </Item>
                             </motion.div>

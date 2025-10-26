@@ -59,10 +59,10 @@ export async function POST(req: Request) {
             },
             { status: 200 }
         );
-    } catch (error: any) {
+    } catch (error) {
         console.error("🔥 Error during sign-in:", error);
         return NextResponse.json(
-            { message: "Internal Server Error", error: error.message },
+            { message: "Internal Server Error", error: error },
             { status: 500 }
         );
     }

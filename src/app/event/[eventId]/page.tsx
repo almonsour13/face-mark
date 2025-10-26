@@ -1,11 +1,9 @@
 "use client";
 
 import EventAttendanceTable from "@/components/event-attendance-table";
-import { SidebarTrigger } from "@/components/ui/sidebar";
-import { eventSessionTypeValue, eventStatusValue } from "@/utils/event-utils";
-import { format } from "date-fns";
-import { Calendar, Clock, MapPin, MoreHorizontal } from "lucide-react";
-import Link from "next/link";
+import HeaderTitle from "@/components/nav-header-title";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -13,10 +11,12 @@ import {
     DropdownMenuShortcut,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import { SidebarTrigger } from "@/components/ui/sidebar";
 import { useEventDetailsStore } from "@/store/use-event-details-store";
-import { Input } from "@/components/ui/input";
+import { eventSessionTypeValue, eventStatusValue } from "@/utils/event-utils";
+import { format } from "date-fns";
+import { Calendar, Clock, MapPin, MoreHorizontal } from "lucide-react";
+import Link from "next/link";
 
 export interface EventSession {
     type: number;
@@ -50,17 +50,19 @@ export default function Page() {
         <div className="w-full min-h-screen bg-background">
             <div className="sticky top-0 z-50 border-b bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/60">
                 <div className="h-14 px-4 pr-6 flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                        <SidebarTrigger />
-                        <h1 className="text-lg font-semibold truncate">
-                            {eventDetails?.name || "Unknown"}
-                        </h1>
+                    <div className="w-full mx-auto flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                            <SidebarTrigger />
+                            <HeaderTitle>
+                                {eventDetails?.name || "Unknown"}
+                            </HeaderTitle>
+                        </div>
+                        <Link href={`/event/${eventDetails?.id}/scan`}>
+                            <Button variant="default" size="sm">
+                                Scan
+                            </Button>
+                        </Link>
                     </div>
-                    <Link href={`/event/${eventDetails?.id}/scan`}>
-                        <Button variant="default" size="sm">
-                            Scan
-                        </Button>
-                    </Link>
                 </div>
             </div>
 

@@ -155,7 +155,7 @@ export async function POST(req: Request) {
                 eventDate,
                 status: parseInt(status) ?? 1,
                 eventSessions: {
-                    create: eventSessions.map((session: any) => ({
+                    create: eventSessions.map((session) => ({
                         type: parseInt(session.type),
                         startTime: session.startTime,
                         endTime: session.endTime,
@@ -183,14 +183,14 @@ export async function POST(req: Request) {
             },
             { status: 201 }
         );
-    } catch (error: any) {
+    } catch (error) {
         console.error("❌ Error creating event:", error);
 
         return NextResponse.json(
             {
                 success: false,
                 message: "Failed to create event due to an internal error.",
-                details: error.message,
+                details: error,
                 timestamp: new Date().toISOString(),
             },
             { status: 500 }

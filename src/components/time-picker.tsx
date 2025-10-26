@@ -1,5 +1,3 @@
-import * as React from "react";
-import { Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
     Popover,
@@ -14,9 +12,8 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
+import { Clock } from "lucide-react";
 import { useEffect, useState } from "react";
-import { SessionType } from "./dialog/create-event-dialog";
-import { time } from "console";
 
 interface TimePickerProps {
     sessionType?: number;
@@ -47,8 +44,8 @@ export function TimePicker({
         if (value) {
             const [time, meridiem] = value.split(" ");
             const [h, m] = time.split(":");
-            let hourNum = parseInt(h);
-            let displayHour =
+            const hourNum = parseInt(h);
+            const displayHour =
                 hourNum === 0 ? 12 : hourNum > 12 ? hourNum - 12 : hourNum;
 
             setHour(displayHour.toString().padStart(2, "0"));
@@ -81,18 +78,18 @@ export function TimePicker({
         // start time should be less than end time
         if (timeType === "start") {
             if (endTime) {
-                const [time, meridiem] = endTime.split(" ");
-                const [h, m] = time.split(":");
-                const hourNumEnd = parseInt(h);
+                const time = endTime.split(" ");
+                const h = time[0].split(":");
+                const hourNumEnd = parseInt(h[0]);
                 if (hourNum >= hourNumEnd) {
                     return false;
                 }
             }
         } else if (timeType === "end") {
             if (startTime) {
-                const [time, meridiem] = startTime.split(" ");
-                const [h, m] = time.split(":");
-                const hourNumStart = parseInt(h);
+                const time = startTime.split(" ");
+                const h = time[0].split(":");
+                const hourNumStart = parseInt(h[0]);
                 if (hourNum <= hourNumStart) {
                     return false;
                 }

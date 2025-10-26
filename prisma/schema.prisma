@@ -37,12 +37,29 @@ model StudentDetails {
   id        String   @id @default(cuid())
   studentId String   @unique
   userId    String   @unique
-  course    String
-  level     String
+  courseId  String
+  levelId   String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  level  Level  @relation(fields: [levelId], references: [id], onDelete: Cascade)
+}
+
+model Course {
+  id             String           @id @default(cuid())
+  code           String?           @unique
+  name           String           @unique
+  createdAt      DateTime         @default(now())
+  studentDetails StudentDetails[]
+}
+
+model Level {
+  id             String           @id @default(cuid())
+  name           String           @unique
+  createdAt      DateTime         @default(now())
+  studentDetails StudentDetails[]
 }
 
 model FaceImage {
@@ -62,28 +79,28 @@ model Event {
   description String?
   location    String?
   status      Int      @default(1) // 1=Draft, 2=Upcoming, 3=Ongoing, 4=Completed, 5=Cancelled, 6=Archived
-  eventDate   DateTime  @default(now())
+  eventDate   DateTime @default(now())
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
   eventSessions Session[]
-  eventType    EventType?   @relation(fields: [eventTypeId], references: [id])
-  createdBy    User?        @relation("UserCreatedEvents", fields: [createdById], references: [id], onDelete: Cascade)
-  attendance   Attendance[]
+  eventType     EventType?   @relation(fields: [eventTypeId], references: [id])
+  createdBy     User?        @relation("UserCreatedEvents", fields: [createdById], references: [id], onDelete: Cascade)
+  attendance    Attendance[]
 }
 
 model Session {
-  id              String    @id @default(cuid())
+  id              String   @id @default(cuid())
   eventId         String
-  type            Int       @default(1) //1 = morning, 2 = afternoon, 3 = evening
+  type            Int      @default(1) //1 = morning, 2 = afternoon, 3 = evening
   startTime       String
   endTime         String?
-  requiresTimeOut Int       @default(1)
-  gracePeriod   Int       @default(40)
-  allowEarlyIn    Int       @default(1)
-  allowEarlyOut   Int       @default(1)
-  status          Int       @default(1) //1=ongoing, 2=completed, 3=cancelled
-  createdAt       DateTime  @default(now())
+  requiresTimeOut Int      @default(1)
+  gracePeriod     Int      @default(40)
+  allowEarlyIn    Int      @default(1)
+  allowEarlyOut   Int      @default(1)
+  status          Int      @default(1) //1=ongoing, 2=completed, 3=cancelled
+  createdAt       DateTime @default(now())
 
   event      Event        @relation(fields: [eventId], references: [id], onDelete: Cascade)
   attendance Attendance[]

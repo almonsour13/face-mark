@@ -1,23 +1,12 @@
-import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle,
-    DialogTrigger,
-} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { CalendarIcon, Check, Plus, Settings, Trash } from "lucide-react";
+import { Calendar } from "@/components/ui/calendar";
 import { Input } from "@/components/ui/input";
-import { useState } from "react";
+import { Label } from "@/components/ui/label";
 import {
     Popover,
     PopoverContent,
     PopoverTrigger,
 } from "@/components/ui/popover";
-import { Calendar } from "@/components/ui/calendar";
-import { Label } from "@/components/ui/label";
 import {
     Select,
     SelectContent,
@@ -26,19 +15,19 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 import { eventStatus } from "@/constant";
-import { TimePicker } from "../time-picker";
-import { Switch } from "../ui/switch";
-import { ScrollArea } from "../ui/scroll-area";
-import DialogSheetWrapper from "./dialog-sheet-wrapper";
-import { tr } from "date-fns/locale";
-import { toast } from "sonner";
-import { Textarea } from "../ui/textarea";
+import { EventSession, useCreateEvent } from "@/hooks/event/use-events";
+import { useEventStore } from "@/store/use-event-store";
 import {
     defaultTimeForSession,
     eventSessionTypeValue,
 } from "@/utils/event-utils";
-import { EventSession, useCreateEvent } from "@/hooks/event/use-events";
-import { useEventStore } from "@/store/use-event-store";
+import { CalendarIcon, Plus, Settings, Trash } from "lucide-react";
+import { useState } from "react";
+import { toast } from "sonner";
+import { TimePicker } from "../time-picker";
+import { Switch } from "../ui/switch";
+import { Textarea } from "../ui/textarea";
+import DialogSheetWrapper from "./dialog-sheet-wrapper";
 
 export type SessionType = "Morning" | "Afternoon" | "Evening";
 

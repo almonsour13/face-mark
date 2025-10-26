@@ -32,7 +32,7 @@ export default function AppSidebar() {
         if (pathName.includes("scan") && pathName.includes("event")) {
             setOpen(false);
         }
-    }, [pathName]);
+    }, [pathName, setOpen]);
     return (
         <Sidebar className="w-a96">
             <SidebarHeader className="h-14 border-b">

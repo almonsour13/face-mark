@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { useSignInUser } from "@/hooks/use-auth";
-import { Lock, Mail, User } from "lucide-react";
+import { Lock, Mail } from "lucide-react";
 import { useState } from "react";
 
 export default function SignInPage() {
@@ -107,7 +107,7 @@ export default function SignInPage() {
                                                 Sign In
                                             </Button>
                                             <FieldDescription className="px-6 text-center">
-                                                Don't have an account?{" "}
+                                               {" Don't"} have an account?{" "}
                                                 <a href="signup">Sign Up</a>
                                             </FieldDescription>
                                         </Field>

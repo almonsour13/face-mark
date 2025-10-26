@@ -12,8 +12,8 @@ export type FormData = {
     email: string;
     password: string;
     studentId: string;
-    course: string;
-    year: string;
+    courseId: string;
+    levelId: string;
     faceImage: File | null;
 };
 
@@ -27,12 +27,12 @@ export default function AccountCreationForm() {
         "forward"
     );
     const [formData, setFormData] = useState<FormData>({
-        name: "MOnsourrrrr SAlida",
+        name: "SAlida Monsour",
         email: "monsour@gmail",
-        password: "monsour",
-        studentId: "2021-3483",
-        course: "Information Technology",
-        year: "4th Year",
+        password: "monsour13",
+        studentId: "2021-3482",
+        courseId: "",
+        levelId: "",
         faceImage: null,
     });
 
@@ -60,10 +60,11 @@ export default function AccountCreationForm() {
             router.replace(`?s=${prevStep}`); // ✅ update query param
         }
     };
-    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        e.preventDefault();
-        const { name, value } = e.target;
-        setFormData((prevForm) => ({ ...prevForm, [name]: value }));
+    const handleInputChange = (name: string, value: string) => {
+        setFormData((prevFormData) => ({
+            ...prevFormData,
+            [name]: value,
+        }));
     };
     return (
         <div className="flex-1">

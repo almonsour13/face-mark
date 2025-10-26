@@ -36,6 +36,7 @@ export async function ensureTensorFlowReady(): Promise<void> {
                 await tf.setBackend("cpu");
                 await tf.ready();
                 console.log("✅ TensorFlow.js CPU backend ready");
+                console.log(webglError)
             }
 
             const backend = tf.getBackend();

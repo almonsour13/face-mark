@@ -1,10 +1,8 @@
 import { prisma } from "@/lib/prisma";
 import {
-    convertToBase64,
-    updatedUserAttendanceFaceImage,
+    convertToBase64
 } from "@/utils/convet-to-base64";
 import { type NextRequest, NextResponse } from "next/server";
-import { parse } from "path";
 
 function parseTimeString(
     eventDate: string | Date,
@@ -183,7 +181,14 @@ export async function POST(req: NextRequest) {
             }
 
             const isLate = now > maxInTime;
-            console.log("maxInTime:", maxInTime.getTime(), "now:", now.getTime(), "isLate:", isLate);
+            console.log(
+                "maxInTime:",
+                maxInTime.getTime(),
+                "now:",
+                now.getTime(),
+                "isLate:",
+                isLate
+            );
             const newTimeIn = await prisma.attendance.create({
                 data: {
                     userId,
@@ -197,7 +202,22 @@ export async function POST(req: NextRequest) {
                         select: {
                             id: true,
                             name: true,
-                            studentDetails: true,
+                            studentDetails: {
+                                select: {
+                                    studentId: true,
+                                    course: {
+                                        select: {
+                                            name: true,
+                                            code: true,
+                                        },
+                                    },
+                                    level:{
+                                        select:{
+                                            name:true
+                                        }
+                                    }
+                                },
+                            },
                             faceImages: {
                                 select: {
                                     imageUrl: true,
@@ -297,7 +317,22 @@ export async function POST(req: NextRequest) {
                         select: {
                             id: true,
                             name: true,
-                            studentDetails: true,
+                            studentDetails: {
+                                select: {
+                                    studentId: true,
+                                    course: {
+                                        select: {
+                                            name: true,
+                                            code: true,
+                                        },
+                                    },
+                                    level:{
+                                        select:{
+                                            name:true
+                                        }
+                                    }
+                                },
+                            },
                             faceImages: {
                                 select: {
                                     imageUrl: true,

@@ -1,26 +1,22 @@
 "use client";
-import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
-    Card,
     CardContent,
     CardDescription,
     CardHeader,
-    CardTitle,
+    CardTitle
 } from "@/components/ui/card";
 import {
     Field,
-    FieldDescription,
     FieldGroup,
-    FieldLabel,
+    FieldLabel
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { FormData } from "../account-creation-form";
-import { on } from "events";
 import { Lock, Mail, User } from "lucide-react";
+import { FormData } from "../account-creation-form";
 interface PersonalInformationStepsProps {
     formData: FormData;
-    handleInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+    handleInputChange: (name: string, value: string) => void;
     onNext: () => void;
 }
 export default function PersonalInformationSteps({
@@ -28,8 +24,8 @@ export default function PersonalInformationSteps({
     handleInputChange,
     onNext,
 }: PersonalInformationStepsProps) {
-    const [showPassword, setShowPassword] = useState(false);
-    const isValid = formData.name && formData.email && formData.password;
+    // const [showPassword, setShowPassword] = useState(false);
+    // const isValid = formData.name && formData.email && formData.password;
 
     return (
         <div className="w-full space-y-4">
@@ -52,7 +48,7 @@ export default function PersonalInformationSteps({
                                 placeholder="John Doe"
                                 className="pl-10 h-10"
                                 required
-                                onChange={handleInputChange}
+                                onChange={(e) => handleInputChange(e.target.name, e.target.value)}
                             />
                         </div>
                     </Field>
@@ -67,7 +63,7 @@ export default function PersonalInformationSteps({
                                 placeholder="m@example.com"
                                 className="pl-10 h-10"
                                 required
-                                onChange={handleInputChange}
+                                onChange={(e) => handleInputChange(e.target.name, e.target.value)}
                             />
                         </div>
                     </Field>
@@ -81,7 +77,7 @@ export default function PersonalInformationSteps({
                                 value={formData.password}
                                 className="pl-10 h-10"
                                 required
-                                onChange={handleInputChange}
+                                onChange={(e) => handleInputChange(e.target.name, e.target.value)}
                             />
                         </div>
                     </Field>

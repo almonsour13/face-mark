@@ -1,6 +1,5 @@
-import { useEffect, useState } from "react";
-import { User } from "../user/use-users";
 import { useQuery } from "@tanstack/react-query";
+import { User } from "../user/use-users";
 
 export interface Attendance {
     userId: string;

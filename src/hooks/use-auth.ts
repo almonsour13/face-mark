@@ -1,6 +1,6 @@
-import { fetchApi } from "@/lib/api";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import * as faceapi from "face-api.js";
+import { User } from "./user/use-users";
 
 interface SignInData {
     email: string;
@@ -12,14 +12,14 @@ interface SignUpData {
     email: string;
     password: string;
     studentId: string;
-    course: string;
-    year: string;
+    courseId: string;
+    levelId: string;
     faceImage: File | null;
 }
 
 interface AuthResponse {
     message: string;
-    user?: any;
+    user?: User;
 }
 
 // Helper function to convert File to base64
@@ -73,8 +73,8 @@ export const useSignUpUser = () => {
                         email: data.email,
                         password: data.password,
                         studentId: data.studentId,
-                        course: data.course,
-                        year: data.year,
+                        courseId: data.courseId,
+                        levelId: data.levelId,
                         faceImage: base64Image, // Send base64 string
                         faceDescriptor: Array.from(uploadedDesc.descriptor), // Convert Float32Array to regular array
                     }),

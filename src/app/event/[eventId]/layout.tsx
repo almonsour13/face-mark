@@ -1,8 +1,6 @@
 "use client";
 
-import { useEventAttendance } from "@/hooks/event/use-event-attendace";
 import { useEventDetails } from "@/hooks/event/use-event-details";
-import { useEventAttendanceStore } from "@/store/use-event-attendace-store";
 import { useEventDetailsStore } from "@/store/use-event-details-store";
 import { useParams } from "next/navigation";
 import { useEffect } from "react";

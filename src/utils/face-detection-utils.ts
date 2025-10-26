@@ -1,38 +1,45 @@
 import { AttendanceStatus } from "@/components/detect/detect-parent-panel";
+import { Face } from "@/store/use-faces-store";
 import * as faceapi from "face-api.js";
-import { stat } from "fs";
 
-export interface User {
-    id: string;
-    name: string;
-    faceImages: {
-        descriptor: number[];
-    };
-}
+
 
 export interface MatchResult {
     isMatch: boolean;
-    user: User | null;
+    user: Face | null;
     distance?: number;
 }
 // Cache for FaceMatcher to avoid rebuilding on every frame
 let faceMatcher: faceapi.FaceMatcher | null = null;
-let cachedUsers: User[] | null = null;
+let cachedUsers: Face[] | null = null;
 let matchThreshold = 0.6;
 
-export function updateFaceMatcherCache(users: User[], threshold: number) {
-    // Only rebuild if users changed or threshold changed
+export function updateFaceMatcherCache(users: Face[], threshold: number) {
     if (cachedUsers === users && matchThreshold === threshold) {
         return;
     }
 
     const labeledDescriptors = users
-        .filter((u) => u.faceImages?.descriptor)
+        .filter((u) => u?.descriptor)
         .map((u) => {
-            return new faceapi.LabeledFaceDescriptors(u.id, [
-                new Float32Array(u.faceImages!.descriptor),
-            ]);
-        });
+            // Handle descriptor whether it's string or number[]
+            let descriptor = u!.descriptor;
+
+            if (typeof descriptor === "string") {
+                try {
+                    descriptor = JSON.parse(descriptor);
+                } catch {
+                    console.warn("Invalid descriptor for user:", u.id);
+                    return null;
+                }
+            }
+
+            // Ensure it's a Float32Array
+            const floatDescriptor = new Float32Array(descriptor);
+
+            return new faceapi.LabeledFaceDescriptors(u.id, [floatDescriptor]);
+        })
+        .filter((d): d is faceapi.LabeledFaceDescriptors => d !== null);
 
     if (labeledDescriptors.length === 0) {
         faceMatcher = null;
@@ -46,7 +53,7 @@ export function updateFaceMatcherCache(users: User[], threshold: number) {
 
 export function matchFaceWithUsers(
     descriptor: Float32Array,
-    users: User[],
+    users: Face[],
     threshold = 0.6
 ): MatchResult {
     updateFaceMatcherCache(users, threshold);
