@@ -1,10 +1,15 @@
+"use client";
+
 import AppLayout from "@/components/layout/app-layout";
-import { Suspense } from "react";
+import RBACGuard from "@/components/rbac-guard";
+import React, { Suspense } from "react";
 
 export default function Layout({ children }: { children: React.ReactNode }) {
     return (
         <AppLayout>
-            <Suspense>{children}</Suspense>
+            <RBACGuard allowedRoles={["admin", "student"]}>
+                <Suspense>{children}</Suspense>
+            </RBACGuard>
         </AppLayout>
     );
 }

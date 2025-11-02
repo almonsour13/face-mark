@@ -17,4 +17,7 @@ export const levelsValue: Record<string, string> = {
     "3": "3rd Year",
     "4": "4th Year",
 };
-
+export const roleValue: Record<number, string> = {
+    1: "user",
+    2: "admin",
+};

@@ -1,16 +1,16 @@
 "use client";
 
-import { useFaceCamera } from "@/hooks/use-camera";
-import { useFaceModel } from "@/hooks/use-face-model";
-import * as faceapi from "face-api.js";
 import React, {
     createContext,
-    useCallback,
     useContext,
-    useEffect,
     useRef,
-    useState
+    useState,
+    useCallback,
+    useEffect,
 } from "react";
+import * as faceapi from "face-api.js";
+import { useFaceModel } from "@/hooks/use-face-model";
+import { useFaceCamera } from "@/hooks/use-camera";
 
 interface FaceDetectionContextType {
     videoRef: React.RefObject<HTMLVideoElement | null>;
@@ -79,7 +79,7 @@ export function FaceDetectionProvider({
             stopCamera(); // 🔴 Stop previous camera first
             await startCamera(); // 🟢 Then start new camera with updated environment
         })();
-    }, [environment, isFaceModelLoading, isFaceModelLoaded, startCamera, stopCamera]);
+    }, [environment]);
 
     const [detections, setDetections] = useState<
         faceapi.WithFaceDescriptor<
@@ -103,9 +103,21 @@ export function FaceDetectionProvider({
         | null
     >(null);
 
-    
+    useEffect(() => {
+        if ( isFaceModelLoaded && isCameraOn) {
+            startDetection();
+        }
 
-    const startDetection = useCallback(() => {
+        return () => {
+            if (animationFrameRef.current) {
+                cancelAnimationFrame(animationFrameRef.current);
+                animationFrameRef.current = null;
+            }
+            isDetectingRef.current = false;
+        };
+    }, [isFaceModelLoaded, isCameraOn]);
+
+    const startDetection = () => {
         if (
             !videoRef.current ||
             !canvasRef.current ||
@@ -156,20 +168,8 @@ export function FaceDetectionProvider({
             animationFrameRef.current = requestAnimationFrame(detectFaces);
         };
         detectFaces();
-    },[videoRef, canvasRef, isFaceModelLoaded, isCameraOn]);
-useEffect(() => {
-        if ( isFaceModelLoaded && isCameraOn) {
-            startDetection();
-        }
+    };
 
-        return () => {
-            if (animationFrameRef.current) {
-                cancelAnimationFrame(animationFrameRef.current);
-                animationFrameRef.current = null;
-            }
-            isDetectingRef.current = false;
-        };
-    }, [isFaceModelLoaded, isCameraOn, startDetection]);
     return (
         <FaceDetectionContext.Provider
             value={{

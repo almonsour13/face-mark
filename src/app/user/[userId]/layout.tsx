@@ -1,6 +1,6 @@
 "use client";
-import { useUserAttendances } from "@/hooks/user/use-user-attendances";
-import { useUserDetails } from "@/hooks/user/user-user-details";
+import { useUserAttendances } from "@/hooks/query/user/use-user-attendances";
+import { useUserDetails } from "@/hooks/query/user/user-user-details";
 import { useUserAttendanceStore } from "@/store/use-user-attendance-store";
 import { useUserDetailsStore } from "@/store/use-user-details-store";
 import { useParams } from "next/navigation";

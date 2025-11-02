@@ -19,5 +19,5 @@ export function useSyncQueryParams<
                 setValue(value);
             }
         }
-    }, [searchParams, params]);
+    }, [searchParams]);
 }

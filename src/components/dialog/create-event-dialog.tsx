@@ -15,7 +15,8 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 import { eventStatus } from "@/constant";
-import { EventSession, useCreateEvent } from "@/hooks/event/use-events";
+import { useEventTypes } from "@/hooks/query/event/use-event-type";
+import { EventSession, useCreateEvent } from "@/hooks/query/event/use-events";
 import { useEventStore } from "@/store/use-event-store";
 import {
     defaultTimeForSession,
@@ -24,10 +25,11 @@ import {
 import { CalendarIcon, Plus, Settings, Trash } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
-import { TimePicker } from "../time-picker";
+import { TimePicker } from "../ui/time-picker";
 import { Switch } from "../ui/switch";
 import { Textarea } from "../ui/textarea";
 import DialogSheetWrapper from "./dialog-sheet-wrapper";
+import { CardDescription, CardHeader, CardTitle } from "../ui/card";
 
 export type SessionType = "Morning" | "Afternoon" | "Evening";
 
@@ -37,7 +39,7 @@ export default function CreateEventDialog() {
         name: "sadasdasdas",
         description: "",
         location: "",
-        eventTypeId: "",
+        eventType: "Meeting",
         eventDate: new Date(),
         status: 1,
     });
@@ -51,6 +53,9 @@ export default function CreateEventDialog() {
             allowEarlyTimeOut: 1,
         },
     ]);
+
+    const { data: eventTypesData, isPending: isEventTypesLoading } =
+        useEventTypes();
 
     const { mutate: createEvent, isPending: isCreateEventLoading } =
         useCreateEvent();
@@ -169,7 +174,7 @@ export default function CreateEventDialog() {
                         name: "",
                         description: "",
                         location: "",
-                        eventTypeId: "",
+                        eventType: "",
                         eventDate: new Date(),
                         status: 1,
                     });
@@ -210,13 +215,21 @@ export default function CreateEventDialog() {
             onOpenChange={setOpen}
             triggerButton={
                 <Button size="sm" className="gap-2">
-                    <Plus className="h-5 w-5" />
                     Create Event
                 </Button>
             }
         >
             <form onSubmit={handleSubmit}>
                 <div className="grid gap-4 p-4 md:p-6 pb-0">
+                    <div className="flex flex-col gap-1">
+                        <h1 className="text-2xl font-semibold">
+                            Create New Event
+                        </h1>
+                        <p className="text-sm text-muted-foreground">
+                            Fill in the details to create a new event. All
+                            fields are required.
+                        </p>
+                    </div>
                     <div className="space-y-2">
                         <Label htmlFor="name">Name</Label>
                         <Input
@@ -246,7 +259,7 @@ export default function CreateEventDialog() {
                             id="location"
                             name="location"
                             placeholder="Event Location"
-                            value={formData.name}
+                            value={formData.location}
                             onChange={handleChange}
                             required
                         />
@@ -257,22 +270,27 @@ export default function CreateEventDialog() {
                                 Type
                             </Label>
                             <Select
-                                value={formData.eventTypeId}
+                                value={formData.eventType}
                                 onValueChange={(value) =>
                                     handleSelectChange("type", value)
                                 }
+                                disabled={isEventTypesLoading}
                             >
                                 <SelectTrigger className="w-full">
                                     <SelectValue placeholder="Select Type" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    {Object.entries(eventStatus).map(
-                                        ([key, value]) => (
-                                            <SelectItem key={key} value={key}>
-                                                {value}
-                                            </SelectItem>
-                                        )
-                                    )}
+                                    {eventTypesData &&
+                                        eventTypesData.eventTypes.map(
+                                            (type) => (
+                                                <SelectItem
+                                                    key={type.id}
+                                                    value={type.name}
+                                                >
+                                                    {type.name}
+                                                </SelectItem>
+                                            )
+                                        )}
                                 </SelectContent>
                             </Select>
                         </div>

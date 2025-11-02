@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import {
     type Attendance,
     useEventAttendance,
-} from "@/hooks/event/use-event-attendace";
+} from "@/hooks/query/event/use-event-attendace";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { ArrowDown, ArrowUp } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -57,11 +57,11 @@ export default function RecentAttendedUsersPanel({
     ]);
 
     return (
-        <div className="w-full lg:w-md bg-card border rounded-md p-4 py-2 flex flex-col gap-4 lg:max-h-full relative">
+        <div className="w-full lg:w-md bg-card  flex flex-col gap-4 lg:max-h-full relative">
             {showLastAttendee && (
                 <div className="flex flex-col w-full gap-2 shrink-0 relative">
                     <div className="flex h-9 items-center justify-between">
-                        <h2 className="font-semibold">Last Attendee</h2>
+                        <h2 className="text-sm font-semibold">Last Attendee</h2>
                     </div>
                     <Card className="py-4 gap-2">
                         {isEventAttendanceLoading ? (
@@ -77,7 +77,7 @@ export default function RecentAttendedUsersPanel({
                                                 className="object-cover rounded"
                                                 src={
                                                     lastUserAttended.user
-                                                        .faceImages.imageUrl ||
+                                                        .face.imageUrl ||
                                                     "/placeholder.svg" ||
                                                     "/placeholder.svg"
                                                 }
@@ -148,9 +148,9 @@ export default function RecentAttendedUsersPanel({
                     </Card>
                 </div>
             )}
-            <div className="flex-1 flex flex-col min-h-0 gap-2">
-                <div className="flex h-9 items-center justify-between sticky top-0 bg-card z-10">
-                    <h2 className="font-semibold shrink-0">
+            <div className="flex-1 flex flex-col min-h-0 gap-4">
+                <div className="flex items-center justify-between">
+                    <h2 className="text-sm font-semibold">
                         Recent Attendance
                     </h2>
                     <Button

@@ -1,4 +1,4 @@
-import { UserAttendances } from "@/hooks/user/use-user-attendances";
+import { UserAttendances } from "@/hooks/query/user/use-user-attendances";
 import {create} from "zustand";
 
 

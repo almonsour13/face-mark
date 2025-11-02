@@ -1,4 +1,4 @@
-import { Event } from "@/hooks/event/use-events";
+import { Event } from "@/hooks/query/event/use-events";
 import { create } from "zustand";
 
 interface EventDetailsProps {

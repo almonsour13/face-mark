@@ -1,138 +1,168 @@
 "use client";
+
 import { Button } from "@/components/ui/button";
 import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardHeader,
-    CardTitle,
-} from "@/components/ui/card";
+    InputGroup,
+    InputGroupAddon,
+    InputGroupButton,
+    InputGroupInput,
+} from "@/components/ui/input-group";
+import { Label } from "@/components/ui/label";
+import { useSignin } from "@/hooks/auth/use-signin";
 import {
-    Field,
-    FieldDescription,
-    FieldGroup,
-    FieldLabel,
-} from "@/components/ui/field";
-import { Input } from "@/components/ui/input";
-import { useSignInUser } from "@/hooks/use-auth";
-import { Lock, Mail } from "lucide-react";
-import { useState } from "react";
+    AlertCircle,
+    Eye,
+    EyeOff,
+    Loader2,
+    Lock,
+    Mail
+} from "lucide-react";
+import { signIn } from "next-auth/react";
+import Link from "next/link";
 
-export default function SignInPage() {
-    const [form, setForm] = useState({
-        name: "almonsour",
-        email: "almonsoursalida@gmail.com",
-        password: "almonsour13",
-    });
+export default function Page() {
+    const {
+        formData,
+        handleChange,
+        handleSubmit,
+        errors,
+        showPassword,
+        setShowPassword,
+        isLoading,
+        processStatus,
+    } = useSignin();
 
-    const { mutate: signIn, isPending: isLoading, error } = useSignInUser();
-
-    const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-        e.preventDefault();
-        signIn(form, {
-            onError: (error) => console.log("error:", error),
-        });
-    };
-    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        e.preventDefault();
-        const { name, value } = e.target;
-        setForm((prevForm) => ({ ...prevForm, [name]: value }));
-    };
     return (
-        <div className="w-full min-h-screen flex  items-center justify-center relative overflow-hidden">
-            {/* Background Elements */}
-            <div className="absolute inset-0 bg-gradient-to-br from-background via-background to-primary/5"></div>
-            <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-primary/10 rounded-full blur-3xl"></div>
-            <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-blue-500/10 rounded-full blur-3xl"></div>
-            <div className="max-w-7xl w-full flex z-10">
-                <div className="flex-1 flex items-center justify-center">
-                    <Card className="max-w-lg w-full mx-auto">
-                        <CardHeader>
-                            <CardTitle className="text-4xl font-bold">
-                                Sign In
-                            </CardTitle>
-                            <CardDescription>
-                                Enter your credentials to access your account
-                            </CardDescription>
-                        </CardHeader>
-                        <CardContent>
-                            <form onSubmit={onSubmit}>
-                                <FieldGroup className="gap-4">
-                                    <Field className="gap-1">
-                                        <FieldLabel htmlFor="email">
-                                            Email
-                                        </FieldLabel>
-                                        <div className="relative">
-                                            <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" />
-                                            <Input
-                                                id="email"
-                                                type="email"
-                                                value={form.email}
-                                                className="pl-10 h-10"
-                                                placeholder="m@example.com"
-                                                required
-                                                onChange={handleInputChange}
-                                            />
-                                        </div>
-                                    </Field>
-                                    <Field className="gap-1">
-                                        <FieldLabel htmlFor="password">
-                                            Password
-                                        </FieldLabel>
-                                        <div className="relative">
-                                            <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" />
-                                            <Input
-                                                id="password"
-                                                type="password"
-                                                className="pl-10 h-10"
-                                                value={form.password}
-                                                required
-                                                onChange={handleInputChange}
-                                            />
-                                        </div>
-                                        {error && (
-                                            <span className="text-red-500 text-sm">
-                                                {error.message}
-                                            </span>
-                                        )}
-                                    </Field>
-
-                                    <FieldGroup>
-                                        <Field>
-                                            <Button
-                                                type="submit"
-                                                disabled={isLoading}
-                                                className=" h-10"
-                                            >
-                                                Sign In
-                                            </Button>
-                                            <FieldDescription className="px-6 text-center">
-                                               {" Don't"} have an account?{" "}
-                                                <a href="signup">Sign Up</a>
-                                            </FieldDescription>
-                                        </Field>
-                                    </FieldGroup>
-                                </FieldGroup>
-                            </form>
-                        </CardContent>
-                    </Card>
-                </div>
-                <div className="flex-1 flex items-center justify-center">
-                    <div className="max-w-lg space-y-4">
-                        <div className="space-y-4">
-                            <h1 className="text-5xl font-bold leading-tight">
-                                Welcome back to
-                                <br />
-                                <span className="text-primary">Face Mark</span>
-                            </h1>
-                            <p className="text-xl text-muted-foreground leading-relaxed">
-                                Your intelligent face recognition attendance
-                                system. Sign in to access your dashboard and
-                                manage attendance records effortlessly.
-                            </p>
-                        </div>
+        <div className="min-h-screen w-full flex">
+            <div className="flex-1 flex flex-col items-center justify-center p-4">
+                <form
+                    onSubmit={handleSubmit}
+                    className="w-full md:max-w-sm flex flex-col gap-4 rounded-md bg-mauted"
+                >
+                    <div className="flex md:hidden">face Mark</div>
+                    <div className="flex flex-col gap-2">
+                        <h1 className="text-2xl font-bold">Sign In</h1>
+                        <p className="text-sm text-muted-foreground">
+                            Enter your credentials to sign in
+                        </p>
                     </div>
-                </div>
+
+                    <div className="flex flex-col gap-2">
+                        <Label>Email</Label>
+                        <InputGroup>
+                            <InputGroupInput
+                                type="email"
+                                name="email"
+                                className=""
+                                placeholder="johndoe@gmail.com"
+                                value={formData.email}
+                                onChange={handleChange}
+                                disabled={isLoading}
+                                required
+                            />
+                            <InputGroupAddon>
+                                <Mail />
+                            </InputGroupAddon>
+                        </InputGroup>
+                        {errors.email && (
+                            <p className="text-sm text-red-500 flex items-center gap-1">
+                                <AlertCircle className="h-3 w-3" />
+                                {errors.email}
+                            </p>
+                        )}
+                    </div>
+
+                    <div className="flex flex-col gap-2">
+                        <Label>Password</Label>
+                        <InputGroup>
+                            <InputGroupInput
+                                type={showPassword ? "text" : "password"}
+                                name="password"
+                                className=""
+                                value={formData.password}
+                                onChange={handleChange}
+                                disabled={isLoading}
+                                required
+                            />
+                            <InputGroupAddon>
+                                <Lock />
+                            </InputGroupAddon>
+
+                            <InputGroupAddon align="inline-end">
+                                <InputGroupButton
+                                    aria-label="Show password"
+                                    title="Show password"
+                                    size="icon-xs"
+                                    onClick={() =>
+                                        setShowPassword(!showPassword)
+                                    }
+                                    disabled={isLoading}
+                                >
+                                    {!showPassword ? <Eye /> : <EyeOff />}
+                                </InputGroupButton>
+                            </InputGroupAddon>
+                        </InputGroup>
+                        {errors.password && (
+                            <p className="text-sm text-red-500 flex items-center gap-1">
+                                {errors.password}
+                            </p>
+                        )}
+                        {/* {statusMessage && (
+                             <p className="text-sm text-green-500 flex items-center gap-1">
+                                {statusMessage}
+                            </p>
+                        )} */}
+                        <Link
+                            href="/forgot-password"
+                            className="text-right text-sm hover:underline"
+                        >
+                            Forgot password?
+                        </Link>
+                    </div>
+
+                    <div className="flex flex-col gap-2">
+                        <Button disabled={isLoading}>
+                            {isLoading ? (
+                                <span className="flex items-center gap-2">
+                                    <Loader2 className="h-4 w-4 animate-spin" />
+                                    {processStatus === "validating" &&
+                                        "Validating..."}
+                                    {processStatus === "authenticating" &&
+                                        "Signing in..."}
+                                    {processStatus === "redirecting" &&
+                                        "Redirecting..."}
+                                    {processStatus === "success" && "Success!"}
+                                    {!processStatus && "Loading..."}
+                                </span>
+                            ) : (
+                                "Sign In"
+                            )}
+                        </Button>
+                        <Button
+                            type="button"
+                            variant="outline"
+                            disabled={isLoading}
+                            onClick={() =>
+                                signIn("google", { callbackUrl: "/home" })
+                            }
+                        >
+                            Continue with Google
+                        </Button>
+                    </div>
+
+                    <p className="text-center text-sm text-muted-foreground">
+                        {"Don't"} have an account?{" "}
+                        <Link
+                            href="/signup"
+                            className="font-medium text-primary hover:underline"
+                        >
+                            Sign Up
+                        </Link>
+                    </p>
+                </form>
+            </div>
+            <div className="flex-1 flex p-8 max-lg:hidden">
+                <div className="flex-1 w-full h-full bg-primary rounded-md p-8 border flex flex-col justify-center"></div>
             </div>
         </div>
     );

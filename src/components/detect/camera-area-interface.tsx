@@ -8,7 +8,7 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 import { useFaceDetectionContext } from "@/context/face-detect-context";
-import { EventSession } from "@/hooks/event/use-events";
+import { EventSession } from "@/hooks/query/event/use-events";
 import { useVideoDevices } from "@/hooks/use-video-devices";
 import { isMobileDevice } from "@/lib/is-mobile";
 import { useEventDetailsStore } from "@/store/use-event-details-store";
@@ -103,7 +103,7 @@ export default function CameraAreaInterface({
 
     return (
         <div className="flex flex-col gap-4 flex-1">
-            <div className="border flex-1 bg-muted/30 rounded-md aspect-square md:aspect-auto w-full relative min-h-0 overflow-hidden">
+            <div className="bg-muted flex-1 rounded-md aspect-square md:aspect-auto w-full relative min-h-0 overflow-hidden">
                 {isFaceModelLoading && (
                     <div className="absolute inset-0 flex items-center justify-center bg-background/80 backdrop-blur-sm z-10">
                         <div className="text-center">
@@ -237,7 +237,7 @@ export default function CameraAreaInterface({
                     </div>
                 </div>
             </div>
-            <div className="min-h-20 w-full flex items-center rounded-md border p-3 sm:p-4">
+            <div className="min-h-20 bg-muted w-full flex items-center rounded-md p-3 sm:p-4">
                 <div className="w-full flex flex-col gap-3 sm:gap-4">
                     {/* Camera Controls Row */}
                     <div className="flex items-center gap-2 sm:gap-4 w-full">

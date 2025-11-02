@@ -1,5 +1,5 @@
 
-import { User } from '@/hooks/user/use-users';
+import { User } from '@/hooks/query/user/use-users';
 import { create } from 'zustand';
 
 interface session {

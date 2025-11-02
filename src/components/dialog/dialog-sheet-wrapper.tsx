@@ -4,7 +4,7 @@ import {
     DialogDescription,
     DialogHeader,
     DialogTitle,
-    DialogTrigger
+    DialogTrigger,
 } from "@/components/ui/dialog";
 import {
     Sheet,
@@ -12,7 +12,7 @@ import {
     SheetDescription,
     SheetHeader,
     SheetTitle,
-    SheetTrigger
+    SheetTrigger,
 } from "@/components/ui/sheet";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { ScrollArea } from "../ui/scroll-area";
@@ -29,16 +29,18 @@ export default function DialogSheetWrapper({
     triggerButton,
 }: DialogSheetWrapperProps) {
     const isMobile = useIsMobile();
-    
+
     if (isMobile) {
         return (
             <Sheet open={open} onOpenChange={onOpenChange}>
-                <SheetTrigger asChild>{triggerButton}</SheetTrigger>
+                {triggerButton && (
+                    <SheetTrigger asChild>{triggerButton}</SheetTrigger>
+                )}
                 <SheetContent
                     side="bottom"
-                    className="h-[90vh] overflow-y-auto"
+                    className="max-h-[90vh] overflow-y-auto overflow-x-hidden"
                 >
-                    <SheetHeader>
+                    {/* <SheetHeader>
                         <SheetTitle className="text-2xl">
                             Create New Event
                         </SheetTitle>
@@ -46,8 +48,8 @@ export default function DialogSheetWrapper({
                             Fill in the details to create a new event. All
                             fields are required.
                         </SheetDescription>
-                    </SheetHeader>
-                    <div>{children}</div>
+                    </SheetHeader> */}
+                    <div className="p-4">{children}</div>
                 </SheetContent>
             </Sheet>
         );
@@ -58,7 +60,7 @@ export default function DialogSheetWrapper({
             <DialogTrigger asChild>{triggerButton}</DialogTrigger>
             <DialogContent className="p-0 w-full">
                 <ScrollArea className="p-0 max-h-[90vh] w-full">
-                    <DialogHeader className="p-6 pb-0">
+                    {/* <DialogHeader className="p-6 pb-0">
                         <DialogTitle className="text-2xl">
                             Create New Event
                         </DialogTitle>
@@ -66,7 +68,7 @@ export default function DialogSheetWrapper({
                             Fill in the details to create a new event. All
                             fields are required.
                         </DialogDescription>
-                    </DialogHeader>
+                    </DialogHeader> */}
                     {children}
                 </ScrollArea>
             </DialogContent>

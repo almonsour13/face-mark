@@ -1,6 +1,6 @@
 "use client";
 
-import { useEventDetails } from "@/hooks/event/use-event-details";
+import { useEventDetails } from "@/hooks/query/event/use-event-details";
 import { useEventDetailsStore } from "@/store/use-event-details-store";
 import { useParams } from "next/navigation";
 import { useEffect } from "react";
@@ -9,6 +9,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     const eventId = useParams().eventId as string;
     const { data: eventDetailsData, isPending: isEventDetailsLoading } =
         useEventDetails(eventId);
+        
     const { setEventDetails, setIsEventDetailsLoading } =
         useEventDetailsStore();
 

@@ -1,4 +1,5 @@
-import { Attendance } from "@/hooks/event/use-event-attendace";
+import { Attendance } from "@/hooks/query/event/use-event-attendace";
+import { fetchApi } from ".";
 
 interface CreateAttendace {
     eventId: string;
@@ -20,12 +21,12 @@ export const createAttendance = async ({
     attendanceType
 }: CreateAttendace): Promise<CreateAttendaceResponse> => {
     try {
-        const response = await fetch("/api/attendance", {
+        console.log("body: ", userId, eventId, sessionType, attendanceType)
+        const response = await fetchApi("/api/attendance", {
             method: "POST",
             body: JSON.stringify({ userId, eventId, sessionType, attendanceType}),
         });
-        const data = await response.json();
-        return data;
+        return response;
     } catch (error) {
         console.error("[v0] Error recording attendance:", error);
         return { success: false, error: String(error) };

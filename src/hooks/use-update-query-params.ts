@@ -21,7 +21,7 @@ export function useUpdateQueryParams(
 
     useEffect(() => {
         const searchParams = new URLSearchParams();
-
+        
         Object.entries(params).forEach(([key, value]) => {
             const defaultValue = defaults[key];
             if (
@@ -46,7 +46,7 @@ export function useUpdateQueryParams(
         basePath,
         options?.replace,
         router,
-        defaults,
-        params
+        JSON.stringify(params),
+        JSON.stringify(defaults),
     ]);
 }
