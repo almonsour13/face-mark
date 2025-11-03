@@ -5,8 +5,8 @@ import type React from "react";
 import { motion } from "framer-motion";
 
 interface StatisticItem {
-    statName: string;
-    value: string | number;
+    name: string;
+    value: number;
     description?: string;
     icon?: React.ReactNode;
 }
@@ -20,46 +20,18 @@ export default function StatisticsCard({
     statistics,
     title = "Statistics",
 }: StatisticsCardProps) {
-    const containerVariants = {
-        hidden: { opacity: 0 },
-        visible: {
-            opacity: 1,
-            transition: {
-                staggerChildren: 0.1,
-                delayChildren: 0.2,
-            },
-        },
-    };
-
-    const itemVariants = {
-        hidden: { opacity: 0, y: 10 },
-        visible: {
-            opacity: 1,
-            y: 0,
-            transition: { duration: 0.4, ease: "easeOut" },
-        },
-    };
-
     return (
-        <div className="flex flex-col gap-4">
-            <h2 className="text-sm font-semibold">
-                {title}
-            </h2>
-            <motion.div
-                className="grid grid-cols-2 gap-2"
-                variants={containerVariants}
-                initial="hidden"
-                animate="visible"
-            >
+        <div className="flex flex-col gap-2">
+            <h2 className="text-lg font-light">Statistic</h2>
+            <div className="grid grid-cols-2 gap-2">
                 {statistics.map((stat, index) => (
-                    <motion.div
+                    <div
                         key={index}
                         className="flex flex-col gap-2 p-4 rounded-lg bg-card border backdrop-blur-sm hover:border-border/80 transition-colors"
-                        variants={itemVariants}
                     >
                         <div className="flex items-start justify-between">
                             <span className="text-xs text-muted-foreground">
-                                {stat.statName}
+                                {stat.name}
                             </span>
                             {stat.icon && (
                                 <div className="text-muted-foreground">
@@ -77,9 +49,9 @@ export default function StatisticsCard({
                                 </p>
                             )}
                         </div>
-                    </motion.div>
+                    </div>
                 ))}
-            </motion.div>
+            </div>
         </div>
     );
 }

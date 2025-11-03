@@ -1,13 +1,18 @@
-import { Event } from "@/hooks/query/event/use-events";
+
+import { Event, EventType, Session } from "@/type";
 import { create } from "zustand";
 
+export interface  EventWithSessions extends Event{
+    eventSessions: Session[];
+    eventType:EventType
+}
 interface EventStore {
     isEventsLoading: boolean;
     setIsEventsLoading: (isEventsLoading: boolean) => void;
-    events: Event[];
-    setEvents: (events: Event[]) => void;
-    addNewEvent: (event: Event) => void;
-    updateEvent: (id: string, event: Event) => void;
+    events: EventWithSessions[];
+    setEvents: (events: EventWithSessions[]) => void;
+    addNewEvent: (event: EventWithSessions) => void;
+    updateEvent: (id: string, event: EventWithSessions) => void;
 }
 export const useEventStore = create<EventStore>((set) => ({
     isEventsLoading: true,

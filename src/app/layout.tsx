@@ -1,11 +1,10 @@
+import { ReactQueryProvider } from "@/components/provider/react-query-provider";
+import { AuthSessionProvider } from "@/components/provider/session-provider";
+import { ThemeProvider } from "@/components/provider/theme-provider";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import "./globals.css";
 import { Toaster } from "sonner";
-import { ReactQueryProvider } from "@/components/provider/react-query-provider";
-import { ThemeProvider } from "@/components/provider/theme-provider";
-import { AuthSessionProvider } from "@/components/provider/session-provider";
-import { SessionCacheProvider } from "@/context/auth-context";
+import "./globals.css";
 
 const geistSans = Geist({
     variable: "--font-geist-sans",
@@ -33,7 +32,6 @@ export default function RootLayout({
                 className={`${geistSans.variable} ${geistMono.variable} antialiased`}
             >
                 <AuthSessionProvider>
-                    <SessionCacheProvider>
                         <ThemeProvider
                             attribute="class"
                             defaultTheme="system"
@@ -47,7 +45,6 @@ export default function RootLayout({
                                 <Toaster />
                             </ReactQueryProvider>
                         </ThemeProvider>
-                    </SessionCacheProvider>
                 </AuthSessionProvider>
             </body>
         </html>

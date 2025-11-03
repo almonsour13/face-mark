@@ -1,9 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
-import { Event } from "./use-events";
 import { fetchApi } from "@/lib/api";
+import { EventDetails } from "@/store/use-event-details-store";
 interface Response {
     sucess: boolean;
-    event: Event;
+    event: EventDetails;
 }
 export const useEventDetails = (eventId: string) => {
     return useQuery<Response, Error>({

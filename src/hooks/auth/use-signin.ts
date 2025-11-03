@@ -22,6 +22,7 @@ export const useSignin = () => {
         email: "almonsoursalida@gmail.com",
         password: "monsour13",
     });
+    
     const [errors, setErrors] = useState<
         Partial<Record<keyof SignInFormData, string>>
     >({});
@@ -74,6 +75,7 @@ export const useSignin = () => {
                 email: formData.email,
                 password: formData.password,
                 redirect: false,
+                // callbackUrl:"/home"
             })) as {
                 ok: boolean;
                 error?: string;
@@ -91,11 +93,11 @@ export const useSignin = () => {
             setProcessStatus("success");
             toast.success("Signed in successfully!");
 
-            // Redirect phase
-            setTimeout(() => {
-                setProcessStatus("redirecting");
-                router.push("/home");
-            }, 500);
+            // // Redirect phase
+            // setTimeout(() => {
+            //     setProcessStatus("redirecting");
+            //     router.push("/home");
+            // }, 500);
         } catch (error) {
             console.error("Sign in error:", error);
             setErrors({

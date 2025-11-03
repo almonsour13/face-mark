@@ -1,19 +1,12 @@
 import { useQuery } from "@tanstack/react-query";
 import { User } from "../user/use-users";
 import { fetchApi } from "@/lib/api";
+import { EventAttendance } from "@/store/use-event-attendace-store";
 
-export interface Attendance {
-    userId: string;
-    id: string;
-    status: number;
-    type: number;
-    method: number;
-    createdAt: Date;
-    user: User;
-}
+
 interface Response{
     sucess: boolean;
-    attendance: Attendance[];
+    attendance: EventAttendance[];
 }
 interface useEventAttendanceProps {
     eventId: string;

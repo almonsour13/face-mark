@@ -1,10 +1,8 @@
 import { fetchApi } from "@/lib/api";
+import { EventType } from "@/type";
 import { useQuery } from "@tanstack/react-query";
 
-interface EventType {
-    id: string;
-    name: string
-}
+
 interface Response {
     success: boolean;
     eventTypes: EventType[]

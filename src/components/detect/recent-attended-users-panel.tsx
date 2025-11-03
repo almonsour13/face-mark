@@ -57,7 +57,7 @@ export default function RecentAttendedUsersPanel({
     ]);
 
     return (
-        <div className="w-full lg:w-md bg-card  flex flex-col gap-4 lg:max-h-full relative">
+        <div className="w-full lg:w-md bg-card p-4  flex flex-col gap-4 lg:max-h-full relative">
             {showLastAttendee && (
                 <div className="flex flex-col w-full gap-2 shrink-0 relative">
                     <div className="flex h-9 items-center justify-between">
@@ -76,8 +76,7 @@ export default function RecentAttendedUsersPanel({
                                             <AvatarImage
                                                 className="object-cover rounded"
                                                 src={
-                                                    lastUserAttended.user
-                                                        .face.imageUrl ||
+                                                    lastUserAttended.user.face?.imageUrl ||
                                                     "/placeholder.svg" ||
                                                     "/placeholder.svg"
                                                 }
@@ -150,7 +149,7 @@ export default function RecentAttendedUsersPanel({
             )}
             <div className="flex-1 flex flex-col min-h-0 gap-4">
                 <div className="flex items-center justify-between">
-                    <h2 className="text-sm font-semibold">
+                    <h2 className="text-lg font-light">
                         Recent Attendance
                     </h2>
                     <Button

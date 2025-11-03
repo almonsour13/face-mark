@@ -1,38 +1,13 @@
 import { fetchApi } from "@/lib/api";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { EventWithSessions } from "@/store/use-event-store";
+import { useQuery } from "@tanstack/react-query";
 
-export interface EventSession {
-    id?: string;
-    type: number;
-    startTime: string;
-    endTime: string;
-    requiresTimeOut: number;
-    allowEarlyTimeIn: number;
-    allowEarlyTimeOut: number;
-    gracePeriod?: number;
-}
-interface EventType {
-    id: string;
-    name: string;
-    createdAt: Date;
-}
-export interface Event {
-    id?: string;
-    eventTypeId: string;
-    name: string;
-    description: string;
-    location: string | null;
-    eventDate: Date;
-    status: number;
-    eventType?: EventType | null;
-    eventSessions: EventSession[];
-}
 interface Response {
     success: boolean;
     message?: string;
     error?: string;
-    newEvent?: Event;
-    events?: Event[];
+    newEvent?: EventWithSessions;
+    events?: EventWithSessions[];
 }
 interface UseEventProps {
     type: string;
@@ -61,30 +36,6 @@ export const useEvents = ({
             });
 
             const response = await fetchApi(`/api/event?${params.toString()}`);
-            return response;
-        },
-    });
-};
-
-interface CreateEventProps{
-        name: string,
-        description: string,
-        location: string,
-        eventType: string,
-        eventSessions: EventSession[],
-        eventDate: Date,
-        status: number,
-}
-export const useCreateEvent = () => {
-    return useMutation<Response, Error, CreateEventProps>({
-        mutationFn: async (data) => {
-            const response = await fetchApi("/api/event", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify(data),
-            });
             return response;
         },
     });

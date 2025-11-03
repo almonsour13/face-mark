@@ -1,29 +1,32 @@
 "use client";
+
+import { roleValue } from "@/constant";
+import { useAppSidebar } from "@/context/app-sidebar-context";
 import {
-    Sidebar,
-    SidebarContent,
-    SidebarFooter,
-    SidebarGroup,
-    SidebarGroupLabel,
-    SidebarHeader,
-    SidebarMenu,
-    SidebarMenuButton,
-    SidebarMenuItem,
-    useSidebar,
-} from "@/components/ui/sidebar";
+    Menu,
+    Moon,
+    Scan,
+    Sun,
+    ToggleLeft,
+    CalendarDays,
+    CheckSquare,
+    Home,
+    LayoutDashboard,
+    Users,
+    Settings,
+} from "lucide-react";
+import { signOut, useSession } from "next-auth/react";
+import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect } from "react";
 import { Button } from "../ui/button";
 import { useTheme } from "next-themes";
-import { Moon, Sun } from "lucide-react";
-import { signOut, useSession } from "next-auth/react";
-import { roleValue } from "@/constant";
 
 export default function AppSidebar() {
-    const { data: session } = useSession();
+    const { data: session, status } = useSession();
+    const { open, toggleSidebar } = useAppSidebar();
+    const pathname = usePathname();
     const { setTheme, theme } = useTheme();
-    const pathName = usePathname();
-    const { setOpen } = useSidebar();
+
     const role = session?.user?.role ? roleValue[session.user.role] : null;
 
     const menu = [
@@ -31,96 +34,152 @@ export default function AppSidebar() {
             title: "Home",
             url: "/home",
             roles: ["user", "admin"],
+            icon: Home,
+        },
+        {
+            title: "Dashboard",
+            url: "/dashboard",
+            roles: ["admin"],
+            icon: LayoutDashboard,
         },
         {
             title: "Events",
             url: "/event",
             roles: ["user", "admin"],
+            icon: CalendarDays,
         },
         {
             title: "Attendance",
             url: "/attendance",
             roles: ["user", "admin"],
+            icon: CheckSquare,
         },
         {
-            title: "users",
+            title: "Users",
             url: "/user",
             roles: ["admin"],
+            icon: Users,
         },
         {
             title: "Settings",
             url: "/setting",
-            roles: ["user", ],
+            roles: ["user", "admin"],
+            icon: Settings,
         },
     ];
     const visibleItems = menu.filter((item) => {
-        // Check role access
-        if (item.roles && item.roles.some((rle) => rle === role)){
+        if (item.roles && item.roles.some((rle) => rle === role)) {
             return true;
         }
 
         return false;
     });
 
-    const handleClick = (url: string) => {
-        if (url.includes("scan")) {
-            setOpen(false);
-        }
-    };
-
     return (
-        <Sidebar className="w-a96">
-            <SidebarHeader className="h-14 border-b">
-                <div className="w-full h-full flex items-center justify-between px-2">
-                    <h1>Face Mark</h1>
-
-                    <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() =>
-                            setTheme(theme === "light" ? "dark" : "light")
-                        }
-                    >
-                        {theme === "light" ? (
-                            <Moon className="h-5 w-5" />
-                        ) : (
-                            <Sun className="h-5 w-5" />
-                        )}
-                    </Button>
+        <>
+            {open && (
+                <div
+                    className="fixed inset-0 z-40 bg-black/80 lg:hidden"
+                    onClick={toggleSidebar}
+                    aria-hidden="true"
+                />
+            )}
+            <div
+                className={`
+                        flex flex-col w-0 transition-all duration-300 
+                        ${open ? "lg:w-64" : "w-0"}`}
+            >
+                <div
+                    className={`w-72 lg:w-64 border-r min-h-screen fixed z-40 bg-background flex flex-col transition-transform duration-300 ${
+                        open ? "translate-x-0" : "-translate-x-full"
+                    }`}
+                >
+                    <div className="h-14 border-b px-6 flex items-center gap-3">
+                        <h2 className="text-xl font-light">Face Mark</h2>
+                    </div>
+                    <div className="flex-1">
+                        <div className="p-2 min-h-0  flex flex-col items-center">
+                            <nav className="space-y-1 w-full">
+                                {visibleItems.map((item, index) => {
+                                    const isActive = pathname.includes(
+                                        item.url
+                                    );
+                                    const Icon = item.icon;
+                                    return (
+                                        <Link
+                                            key={index}
+                                            href={item.url}
+                                            className="block w-full"
+                                        >
+                                            <Button
+                                                size="lg"
+                                                variant={
+                                                    isActive
+                                                        ? "default"
+                                                        : "ghost"
+                                                }
+                                                className="w-full items-center justify-start px-4 gap-3 font-light"
+                                            >
+                                                <Icon className="h-5 w-5 flex-shrink-0 stroke-2" />
+                                                {item.title}
+                                            </Button>
+                                        </Link>
+                                    );
+                                })}
+                            </nav>
+                        </div>
+                        {/* 🔹 Common Links */}
+                    </div>
+                    {session?.user && (
+                        <div className="h-14 flex items-center px-6 border-t border-border/30">
+                            <div className="flex items-center gap-3">
+                                <div className="h-10 w-10 rounded-full bg-muted/50 flex items-center justify-center">
+                                    <span className="text-sm font-light">
+                                        {session.user.name
+                                            ?.charAt(0)
+                                            .toUpperCase() || "U"}
+                                    </span>
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                    <p className="text-sm font-light text-foreground truncate">
+                                        {session.user.name || "User"}
+                                    </p>
+                                    <p className="text-xs font-light text-muted-foreground truncate">
+                                        {role}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                    <div className="px-2 w-full flex h-14 border-t items-center gap-2">
+                        <Button
+                            size="lg"
+                            onClick={() => signOut({ callbackUrl: "/auth/signin" })}
+                            variant={"destructive"}
+                            className="flex-1 items-center justify-start px-4"
+                        >
+                            Sign out
+                        </Button>
+                        <Button
+                            size="icon-lg"
+                            variant="outline"
+                            onClick={() =>
+                                setTheme(theme === "dark" ? "light" : "dark")
+                            }
+                        >
+                            {theme === "dark" ? <Sun /> : <Moon />}
+                        </Button>
+                    </div>
                 </div>
-            </SidebarHeader>
-            <SidebarContent>
-                <SidebarGroup>
-                    <SidebarGroupLabel>Menu</SidebarGroupLabel>
-                    <SidebarMenu>
-                        {visibleItems.map((item) => (
-                            <SidebarMenuItem key={item.title}>
-                                <SidebarMenuButton
-                                    asChild
-                                    className="h-10"
-                                    isActive={pathName.includes(item.url)}
-                                    onAbort={() => handleClick(item.url)}
-                                >
-                                    <a href={item.url}>
-                                        {/* <item.icon /> */}
-                                        <span>{item.title}</span>
-                                    </a>
-                                </SidebarMenuButton>
-                            </SidebarMenuItem>
-                        ))}
-                    </SidebarMenu>
-                </SidebarGroup>
-            </SidebarContent>
-            <SidebarFooter>
-                <SidebarMenuItem>
-                    <Button
-                        onClick={() => signOut({ callbackUrl: "/signin" })}
-                        variant="destructive"
-                    >
-                        Sign Out
-                    </Button>
-                </SidebarMenuItem>
-            </SidebarFooter>
-        </Sidebar>
+            </div>
+        </>
     );
 }
+export const SidebarTriggerButton = () => {
+    const { toggleSidebar } = useAppSidebar();
+    return (
+        <Button onClick={toggleSidebar} variant="ghost" size="icon-sm">
+            <Menu className="w-5 h-5" />
+        </Button>
+    );
+};

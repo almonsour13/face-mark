@@ -1,5 +1,6 @@
 import { Attendance } from "@/hooks/query/event/use-event-attendace";
 import { fetchApi } from ".";
+import { getSession } from "next-auth/react";
 
 interface CreateAttendace {
     eventId: string;
@@ -14,6 +15,25 @@ interface CreateAttendaceResponse {
     type?: string;
     attendance?: Attendance
 }
+
+export const getAllAttendance = async () => {
+    const session = await getSession();
+
+    if (!session?.accessToken) {
+        throw new Error("No access token found");
+    }
+
+    const response = await fetchApi("/api/attendance", {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${session.accessToken}`,
+        },
+    });
+
+    return response;
+}
+
 export const createAttendance = async ({
     userId,
     eventId,

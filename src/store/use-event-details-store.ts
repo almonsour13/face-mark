@@ -1,11 +1,15 @@
-import { Event } from "@/hooks/query/event/use-events";
+
+import { Session } from "inspector";
 import { create } from "zustand";
 
+export interface EventDetails extends Event{
+    eventSessions: Session[];
+}
 interface EventDetailsProps {
     isEventDetailsLoading: boolean;
     setIsEventDetailsLoading: (isLoading: boolean) => void;
-    eventDetails: Event | null;
-    setEventDetails: (eventDEtails: Event) => void;
+    eventDetails: EventDetails | null;
+    setEventDetails: (eventDEtails: EventDetails) => void;
 }
 
 export const useEventDetailsStore = create<EventDetailsProps>((set) => ({
@@ -21,6 +25,6 @@ export const useEventDetailsStore = create<EventDetailsProps>((set) => ({
             eventDetails: {
                 ...state.eventDetails,
                 ...updatedDetails,
-            } as Event,
+            } as EventDetails,
         })),
 }));

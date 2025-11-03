@@ -2,7 +2,7 @@
 
 import { roleValue } from "@/constant";
 import { useSession } from "next-auth/react";
-import { notFound } from "next/navigation";
+import { notFound, useRouter } from "next/navigation";
 import { ReactNode } from "react";
 
 interface RBACGuardProps {
@@ -12,7 +12,7 @@ interface RBACGuardProps {
 
 export default function RBACGuard({ allowedRoles, children }: RBACGuardProps) {
     const { data: session, status } = useSession();
-
+   const router = useRouter();
     if (status === "loading") {
         return (
             <div className="flex items-center justify-center min-h-screen">
@@ -21,11 +21,11 @@ export default function RBACGuard({ allowedRoles, children }: RBACGuardProps) {
         );
     }
 
-    if (!session) {
-        throw notFound();
-    }
+    // if (!session) {
+    //     return router.push("/auth/signin")
+    // }
 
-    if (session.user.role && !allowedRoles.includes(roleValue[session.user.role])) {
+    if (session && session.user.role && !allowedRoles.includes(roleValue[session.user.role])) {
         throw notFound();
     }
 

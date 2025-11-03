@@ -1,11 +1,7 @@
 import { fetchApi } from "@/lib/api";
+import { Course } from "@/type";
 import { useQuery } from "@tanstack/react-query"
 
-interface Course {
-    id: string;
-    name: string;
-    code: string;
-}
 interface Response {
     success : boolean;
     courses: Course[]

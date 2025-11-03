@@ -1,12 +1,12 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { User } from "./use-users";
 import { fetchApi } from "@/lib/api";
+import { UserWithDetails } from "@/store/use-user-store";
 
 interface Response {
     success: boolean;
-    userDetails: User;
+    userDetails: UserWithDetails;
 }
 export const useUserDetails = (userId:string) => {
     return useQuery<Response, Error>({

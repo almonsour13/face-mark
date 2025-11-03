@@ -103,7 +103,7 @@ export default function CameraAreaInterface({
 
     return (
         <div className="flex flex-col gap-4 flex-1">
-            <div className="bg-muted flex-1 rounded-md aspect-square md:aspect-auto w-full relative min-h-0 overflow-hidden">
+            <div className="bg-card flex-1 rounded-md aspect-square md:aspect-auto w-full relative min-h-0 overflow-hidden">
                 {isFaceModelLoading && (
                     <div className="absolute inset-0 flex items-center justify-center bg-background/80 backdrop-blur-sm z-10">
                         <div className="text-center">
@@ -237,7 +237,7 @@ export default function CameraAreaInterface({
                     </div>
                 </div>
             </div>
-            <div className="min-h-20 bg-muted w-full flex items-center rounded-md p-3 sm:p-4">
+            <div className="min-h-20 bg-card w-full flex items-center rounded-md p-3 sm:p-4">
                 <div className="w-full flex flex-col gap-3 sm:gap-4">
                     {/* Camera Controls Row */}
                     <div className="flex items-center gap-2 sm:gap-4 w-full">

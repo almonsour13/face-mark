@@ -9,17 +9,9 @@ interface AuthGuardProps {
     redirectTo?: string; // where to send signed users (default: /dashboard)
 }
 
-export default function AuthGuard({
-    children,
-}: AuthGuardProps) {
-    const { data: session, status } = useSession();
+export default function AuthGuard({ children }: AuthGuardProps) {
+    const { status } = useSession();
     const router = useRouter();
-
-    useEffect(() => {
-        if (status === "authenticated") {
-            router.back();
-        }
-    }, [status, router]);
 
     if (status === "loading") {
         return (
@@ -29,8 +21,7 @@ export default function AuthGuard({
         );
     }
 
-    if (status === "authenticated") return null;
+    if (status === "authenticated") return router.push("/home");
 
-    // Not signed in → show auth page
     return <>{children}</>;
 }

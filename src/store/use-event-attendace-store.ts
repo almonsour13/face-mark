@@ -1,27 +1,20 @@
 
-import { User } from '@/hooks/query/user/use-users';
+import { Attendance, Course, Face, Level, Session, StudentDetails, User } from '@/type';
 import { create } from 'zustand';
+import { UserWithDetails } from './use-user-store';
 
-interface session {
-    type: number;
-}
-interface Attendance {
-    userId: string;
-    id: string;
-    status: number;
-    type: number;
-    method: number;
-    createdAt: Date;
-    user: User;
-    session?: session
+
+export interface EventAttendance extends Attendance{
+    session:Session;
+    user:UserWithDetails
 }
 
 interface EventAttendanceProps {
     isEventAttendanceLoading: boolean;
     setEventAttendanceLoading: (isEventAttendanceLoading: boolean) => void;    
-    eventAttendance:  Attendance[];
-    setEventAttendance: (eventAttendance: Attendance[]) => void;
-    addEventAttendance: (eventAttendance: Attendance) => void;
+    eventAttendance:  EventAttendance[];
+    setEventAttendance: (eventAttendance: EventAttendance[]) => void;
+    addEventAttendance: (eventAttendance: EventAttendance) => void;
     removeEventAttendance:(id:string) => void
 }
 export const useEventAttendanceStore = create<EventAttendanceProps>((set) => ({
@@ -30,7 +23,7 @@ export const useEventAttendanceStore = create<EventAttendanceProps>((set) => ({
     eventAttendance: [],
     setEventAttendance: (eventAttendance) =>
         set(() => ({ eventAttendance })),
-    addEventAttendance: (eventAttendance: Attendance) =>
+    addEventAttendance: (eventAttendance: EventAttendance) =>
         set((state) => ({
             eventAttendance: [...state.eventAttendance, eventAttendance]
         })),    

@@ -2,7 +2,6 @@
 
 import CameraAreaInterface from "@/components/detect/camera-area-interface";
 import RecentAttendedUsersPanel from "@/components/detect/recent-attended-users-panel";
-import { SidebarTrigger } from "@/components/ui/sidebar";
 import { levelsValue } from "@/constant";
 import { useFaceDetectionContext } from "@/context/face-detect-context";
 import { Attendance } from "@/hooks/query/event/use-event-attendace";
@@ -18,6 +17,7 @@ import { toast } from "sonner";
 import HeaderTitle from "@/components/layout/nav-header-title";
 import Header from "../layout/nav-header";
 import PageWrapper from "../page-wrapper";
+import { SidebarTriggerButton } from "../layout/app-side-bar";
 
 export enum AttendanceStatusType {
     TIME_IN = "time-in",
@@ -343,7 +343,7 @@ export default function DetectParentPanel() {
             <Header title="Scan">
                 <div className="w-full mx-auto flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                        <SidebarTrigger />
+                        <SidebarTriggerButton />
                         <HeaderTitle>
                             {eventDetails?.name || "Unknown"}
                         </HeaderTitle>

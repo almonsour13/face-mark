@@ -7,7 +7,7 @@ import React, { Suspense } from "react";
 export default function Layout({ children }: { children: React.ReactNode }) {
     return (
         <AppLayout>
-            <RBACGuard allowedRoles={["admin", "student"]}>
+            <RBACGuard allowedRoles={["admin", "user"]}>
                 <Suspense>{children}</Suspense>
             </RBACGuard>
         </AppLayout>

@@ -1,39 +1,12 @@
 "use client";
 
 import { fetchApi } from "@/lib/api";
+import { UserWithDetails } from "@/store/use-user-store";
 import { useQuery } from "@tanstack/react-query";
 
-interface Course{
-    id: string;
-    name: string;
-    code: string;
-}
-interface Level{
-    id: string;
-    name: string;
-}
-interface StudentDetails {
-    course: Course;
-    level: Level;
-    studentId: string;
-}
-interface FaceImage {
-    imageUrl: string;
-}
-export interface User {
-    id: string;
-    name: string;
-    email: string;
-    status: number;
-    role: number;
-    createdAt: Date;
-    updatedAt: Date;
-    face?: FaceImage;
-    studentDetails?: StudentDetails;
-}
 interface Response {
     success: boolean;
-    users: User[];
+    users: UserWithDetails[];
 }
 interface UseUserProps {
     course?: string;

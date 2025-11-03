@@ -1,7 +1,11 @@
-import { UserAttendances } from "@/hooks/query/user/use-user-attendances";
+
+import { Attendance, Event, Session } from "@/type";
 import {create} from "zustand";
 
-
+export interface UserAttendances extends Attendance{
+    session: Session;
+    event?: Event
+}
 interface UserAttendanceProps {
     isUserAttendanceLoading: boolean;
     setUserAttendanceLoading: (isUserAttendanceLoading: boolean) => void

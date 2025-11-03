@@ -3,7 +3,6 @@ import { useEffect, useState } from "react";
 import * as faceapi from "face-api.js";
 import { ensureTensorFlowReady } from "@/lib/tensorflow-init";
 import * as tf from "@tensorflow/tfjs";
-import { toast } from "sonner";
 
 export const useFaceModel = () => {
     const [isFaceModelLoading, setIsFaceModelLoading] = useState(true);
@@ -54,7 +53,6 @@ export const useFaceModel = () => {
                 if (!isMounted) return;
                 
                 console.log("✅ All models loaded successfully!");
-                toast.success("All models loaded successfully!");
                 setIsFaceModelLoaded(true);
             } catch (err) {
                 if (!isMounted) return;
@@ -64,7 +62,6 @@ export const useFaceModel = () => {
                         ? err.message
                         : "Failed to load models";
                 console.error("❌ Error loading models:", err);
-                toast.error(errorMessage);
                 setError(errorMessage);
                 setIsFaceModelLoaded(false);
             } finally {
