@@ -1,33 +1,34 @@
 import { useQuery } from "@tanstack/react-query";
-import { User } from "../user/use-users";
 import { fetchApi } from "@/lib/api";
 import { EventAttendance } from "@/store/use-event-attendace-store";
 
-
-interface Response{
+interface Response {
     sucess: boolean;
     attendance: EventAttendance[];
+    hasMore?: boolean;
+    nextCursor?: string | null;
 }
 interface useEventAttendanceProps {
     eventId: string;
-    sessionType:string;
-    level: string;
-    attendanceType: string;
-    search?: string;
-    count?: number
+    filters?: Record<string, string>;
+    nextCursor?: string | null;
 }
-export const useEventAttendance = ({eventId, sessionType, level, attendanceType, search, count = 20}: useEventAttendanceProps) => {
+export const useEventAttendance = ({
+    eventId,
+    filters,
+    nextCursor,
+}: useEventAttendanceProps) => {
     return useQuery<Response, Error>({
-        queryKey: ["eventAttendance", eventId, sessionType, level, attendanceType, search],
+        queryKey: ["eventAttendance", eventId, eventId, nextCursor],
         queryFn: async () => {
             const params = new URLSearchParams({
-                sessionType,
-                level,
-                attendanceType,
-                count: count.toString(),
-                ...(search && { search }),
+                ...filters,
+                ...(nextCursor && { nextCursor }),
             });
-            const response = await fetchApi<Response>(`/api/event/${eventId}/attendance?${params.toString()}`);
+            const response = await fetchApi<Response>(
+                `/api/event/${eventId}/attendance?${params.toString()}`
+            );
+            console.log(response)
             return response;
         },
     });

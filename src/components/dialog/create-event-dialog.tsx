@@ -14,11 +14,8 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
-import { eventStatus } from "@/constant";
+import { eventSessionType, eventStatus } from "@/constant";
 import { useEventTypes } from "@/hooks/query/event/use-event-type";
-import {
-    eventSessionTypeValue,
-} from "@/utils/event-utils";
 import { CalendarIcon, Plus, Settings, Trash } from "lucide-react";
 import { useState } from "react";
 import { TimePicker } from "../ui/time-picker";
@@ -30,8 +27,12 @@ import { useCreateEvents } from "@/hooks/use-create-event";
 import { toast } from "sonner";
 
 export type SessionType = "Morning" | "Afternoon" | "Evening";
-
-export default function CreateEventDialog() {
+interface CreateEventDialogProps {
+    children?: React.ReactNode;
+}
+export default function CreateEventDialog({
+    children,
+}: CreateEventDialogProps) {
     const [isAlertDialogOpen, setAlertDialogOpen] = useState(false);
     const {
         open,
@@ -53,6 +54,7 @@ export default function CreateEventDialog() {
         availableSessionTypes,
         isCreateEventLoading,
     } = useCreateEvents();
+
     const { data: eventTypesData, isPending: isEventTypesLoading } =
         useEventTypes();
 
@@ -61,14 +63,14 @@ export default function CreateEventDialog() {
             name: "",
             description: "",
             location: "",
-            eventType: "",
+            eventTypeId: "",
             status: 1,
             eventDate: new Date(),
         });
         setOpen(false);
         toast.success("Changes discarded");
-    }
-    
+    };
+
     const isValid =
         formData.name.trim() !== "" &&
         formData.eventDate instanceof Date &&
@@ -105,9 +107,13 @@ export default function CreateEventDialog() {
                     setOpen(isOpen);
                 }}
                 triggerButton={
-                    <Button size="sm" className="gap-2">
-                        Create Event
-                    </Button>
+                    children ? (
+                        children
+                    ) : (
+                        <Button size="sm" className="gap-2">
+                            Create Event
+                        </Button>
+                    )
                 }
             >
                 <form onSubmit={handleSubmit}>
@@ -155,16 +161,24 @@ export default function CreateEventDialog() {
                                 required
                             />
                         </div>
+                        {formData.eventTypeId}
                         <div className="flex flex-wrap gap-2">
                             <div className="flex-1">
                                 <Label htmlFor="type" className="mb-2">
                                     Type
                                 </Label>
                                 <Select
-                                    value={formData.eventType}
-                                    onValueChange={(value) =>
-                                        handleSelectChange("type", value)
+                                    value={
+                                        formData.eventTypeId ||
+                                        (eventTypesData &&
+                                            eventTypesData.eventTypes[0].id)
                                     }
+                                    onValueChange={(value) => {
+                                        handleSelectChange(
+                                            "eventTypeId",
+                                            value
+                                        );
+                                    }}
                                     disabled={isEventTypesLoading}
                                 >
                                     <SelectTrigger className="w-full">
@@ -176,7 +190,7 @@ export default function CreateEventDialog() {
                                                 (type) => (
                                                     <SelectItem
                                                         key={type.id}
-                                                        value={type.name}
+                                                        value={type.id}
                                                     >
                                                         {type.name}
                                                     </SelectItem>
@@ -283,7 +297,7 @@ export default function CreateEventDialog() {
                                                         value={session.type.toString()}
                                                     >
                                                         {
-                                                            eventSessionTypeValue[
+                                                            eventSessionType[
                                                                 session.type
                                                             ]
                                                         }
@@ -295,7 +309,7 @@ export default function CreateEventDialog() {
                                                                 value={type.toString()}
                                                             >
                                                                 {
-                                                                    eventSessionTypeValue[
+                                                                    eventSessionType[
                                                                         type
                                                                     ]
                                                                 }
@@ -496,7 +510,6 @@ export default function CreateEventDialog() {
                 open={isAlertDialogOpen}
                 setOpen={setAlertDialogOpen}
                 onDiscard={handleDiscard}
-
             />
         </>
     );

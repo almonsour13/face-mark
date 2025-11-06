@@ -1,12 +1,13 @@
-import { levelsValue } from "@/constant";
+import { eventSessionType, levelsValue } from "@/constant";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { eventSessionTypeValue } from "@/utils/event-utils";
 import { AlertCircle, CheckCircle2, Clock } from "lucide-react";
 import { format } from "date-fns";
 import Link from "next/link";
 import { EventAttendance } from "@/store/use-event-attendace-store";
+import { boolean } from "zod";
+import { Card } from "../ui/card";
 
 export default function EventAttendanceCard({
     attendance,
@@ -23,11 +24,11 @@ export default function EventAttendanceCard({
     const level = studentDetails && levelsValue[studentDetails?.level.name];
 
     return (
-        <div
+        <Card
             key={attendance.id}
-            className={` flex gap-3 bg-card border rounded-md p-4 ${className}`}
+            className={`flex-row ${className}`}
         >
-            <div className="h-28 w-28 rounded overflow-hidden bg-muted flex-shrink-0">
+            <div className="h-24 w-24 rounded overflow-hidden bg-muted flex-shrink-0">
                 <Image
                     src={
                         face?.imageUrl ||
@@ -41,18 +42,17 @@ export default function EventAttendanceCard({
             </div>
 
             {/* Info Section */}
-            <div className="flex-1 flex flex-col gap-3 min-w-0">
+            <div className="flex-1 flex flex-col gap-2 min-w-0">
                 {/* Header */}
                 <div className="flex items-start justify-between gap-4">
                     <div className="flex-1 min-w-0">
-                        <Link href={`/user/${attendance.user.id}`} className="hover:underline">
-                            <h3 className="text-lg font-light text-foreground truncate">
-                            {name}
-                        </h3>
+                        <Link
+                            href={`/user/${attendance.user.id}`}
+                        >
+                            <h3 className="text-xl font-light hover:text-muted-foreground    text-foreground truncate">
+                                {name}
+                            </h3>
                         </Link>
-                        <p className="text-xs font-light text-muted-foreground">
-                            {studentDetails?.studentId}
-                        </p>
                     </div>
 
                     <div className="flex gap-2 flex-shrink-0">
@@ -71,11 +71,16 @@ export default function EventAttendanceCard({
                         </Badge>
                     </div>
                 </div>
+                <div className="">
+                    <p className="text-xs font-light text-muted-foreground">
+                        {[ studentDetails.studentId, course, level].filter(Boolean).join(" | ")}
+                    </p>
+                </div>
 
                 {/* Details */}
                 <div className="flex flex-wrap gap-4 text-xs font-light text-muted-foreground">
                     <span className="text-foreground">
-                        {eventSessionTypeValue[attendance.session?.type || 1]}
+                        {eventSessionType[attendance.session?.type || 1]}
                     </span>
                     <div className="flex items-center gap-2">
                         <Clock className="h-3 w-3" />
@@ -102,15 +107,7 @@ export default function EventAttendanceCard({
                         )}
                     </div>
                 </div>
-                <div className="space-y-1">
-                    <p className="text-xs font-light text-foreground">
-                        {course}
-                    </p>
-                    <p className="text-xs font-light text-muted-foreground">
-                        {level}
-                    </p>
-                </div>
             </div>
-        </div>
+        </Card>
     );
 }

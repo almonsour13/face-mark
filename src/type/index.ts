@@ -4,6 +4,7 @@ export interface User{
     email:string;
     image?:string;
     role:number;
+    status:number;
     createdAt:Date;
     updatedAt:Date;
 }
@@ -53,7 +54,7 @@ export interface EventType {
 }
 export interface Session {
     id?: string;
-    eventId: string;
+    eventId?: string;
     type: number;
     startTime: string;
     endTime: string;

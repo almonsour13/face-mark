@@ -1,10 +1,9 @@
-
 import { Event, EventType, Session } from "@/type";
 import { create } from "zustand";
 
-export interface  EventWithSessions extends Event{
+export interface EventWithSessions extends Event {
     eventSessions: Session[];
-    eventType:EventType
+    eventType: EventType;
 }
 interface EventStore {
     isEventsLoading: boolean;
@@ -13,6 +12,7 @@ interface EventStore {
     setEvents: (events: EventWithSessions[]) => void;
     addNewEvent: (event: EventWithSessions) => void;
     updateEvent: (id: string, event: EventWithSessions) => void;
+    addMoreEvents: (events: EventWithSessions[]) => void;
 }
 export const useEventStore = create<EventStore>((set) => ({
     isEventsLoading: true,
@@ -25,4 +25,6 @@ export const useEventStore = create<EventStore>((set) => ({
         set((state) => ({
             events: state.events.map((e) => (e.id === id ? event : e)),
         })),
+    addMoreEvents: (events) =>
+        set((state) => ({ events: [...state.events, ...events] })),
 }));

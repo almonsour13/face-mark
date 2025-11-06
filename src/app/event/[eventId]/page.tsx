@@ -13,7 +13,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 import StatisticsCard from "@/components/statistics-card";
 import { useEventDetailsStore } from "@/store/use-event-details-store";
-import { eventSessionTypeValue, eventStatusValue } from "@/utils/event-utils";
 import { format } from "date-fns";
 import { Calendar, Clock, MapPin, MoreHorizontal, Scan } from "lucide-react";
 import Link from "next/link";
@@ -24,34 +23,8 @@ import RoleBasedRender from "@/components/role-based-render";
 import { useEventAttendanceStatistic } from "@/hooks/query/event/use-event-attendace-statistic";
 import { useParams } from "next/navigation";
 import BackButton from "@/components/back-button";
-
-export interface EventSession {
-    type: number;
-    startTime: string;
-    endTime: string;
-    requiresTimeOut: number;
-    allowEarlyTimeIn: number;
-    allowEarlyTimeOut: number;
-    gracePeriod?: number;
-}
-
-interface EventType {
-    id: string;
-    name: string;
-    createdAt: Date;
-}
-
-export interface Event {
-    id?: string;
-    eventTypeId: string;
-    name: string;
-    description: string;
-    location: string | null;
-    eventDate: Date;
-    status: number;
-    eventType?: EventType | null;
-    eventSessions: EventSession[];
-}
+import { eventSessionType, eventStatus } from "@/constant";
+import { Card } from "@/components/ui/card";
 
 export default function Page() {
     const eventId = useParams().eventId as string;
@@ -79,7 +52,7 @@ export default function Page() {
                             {eventDetails?.name || "Unknown"}
                         </HeaderTitle>
                     </div>
-                    {/* <RoleBasedRender allowedRoles={["admin"]}> */}
+                    <RoleBasedRender allowedRoles={["admin"]}>
                     <div className="flex gap-2">
                         <Link href={`/event/${eventDetails?.id}/scan`}>
                             <Button variant="default" size="sm">
@@ -112,7 +85,7 @@ export default function Page() {
                             </DropdownMenuContent>
                         </DropdownMenu>
                     </div>
-                    {/* </RoleBasedRender> */}
+                    </RoleBasedRender>
                 </div>
             </Header>
             <PageWrapper>
@@ -129,17 +102,15 @@ export default function Page() {
                                 <div className="flex flex-wrap items-center gap-2">
                                     {eventDetails.eventType && (
                                         <Badge
-                                            variant="secondary"
-                                            className="texta-xs font-medium"
+                                            variant="outline"
                                         >
                                             {eventDetails.eventType.name}
                                         </Badge>
                                     )}
                                     <Badge
                                         variant="outline"
-                                        className="texst-xs font-medium"
                                     >
-                                        {eventStatusValue[eventDetails.status]}
+                                        {eventStatus[eventDetails.status]}
                                     </Badge>
                                 </div>
                                 <h1 className="text-4xl lg:text-4xl font-light">
@@ -179,15 +150,14 @@ export default function Page() {
                                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                                     {eventDetails.eventSessions.map(
                                         (session, index) => (
-                                            <div
+                                            <Card
                                                 key={index}
-                                                className="p-4 rounded-md border bg-card"
                                             >
                                                 <div className="flex flex-col gap-2">
                                                     <div className="flex w-full justify-between items-center">
                                                         <h3 className="text-lg font-light">
                                                             {
-                                                                eventSessionTypeValue[
+                                                                eventSessionType[
                                                                     session.type
                                                                 ]
                                                             }
@@ -232,7 +202,7 @@ export default function Page() {
                                                         </div>
                                                     </div>
                                                 </div>
-                                            </div>
+                                            </Card>
                                         )
                                     )}
                                 </div>

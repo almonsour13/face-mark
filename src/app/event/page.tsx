@@ -2,29 +2,15 @@
 
 import { EventCard } from "@/components/card/event-card";
 import CreateEventDialog from "@/components/dialog/create-event-dialog";
+import EventFilter from "@/components/filter/event-filter";
 import { SidebarTriggerButton } from "@/components/layout/app-side-bar";
 import Header from "@/components/layout/nav-header";
 import HeaderTitle from "@/components/layout/nav-header-title";
+import LoadMoreWrapper from "@/components/load-more-wrapper";
 import PageWrapper from "@/components/page-wrapper";
 import RoleBasedRender from "@/components/role-based-render";
 import { EventsCardSkeleton } from "@/components/skeleton-loader";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-    DropdownMenu,
-    DropdownMenuCheckboxItem,
-    DropdownMenuContent,
-    DropdownMenuGroup,
-    DropdownMenuItem,
-    DropdownMenuLabel,
-    DropdownMenuPortal,
-    DropdownMenuSeparator,
-    DropdownMenuShortcut,
-    DropdownMenuSub,
-    DropdownMenuSubContent,
-    DropdownMenuSubTrigger,
-    DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import {
     Empty,
     EmptyContent,
@@ -33,73 +19,62 @@ import {
     EmptyMedia,
     EmptyTitle,
 } from "@/components/ui/empty";
-import { Input } from "@/components/ui/input";
-import { eventStatus } from "@/constant";
-import { useEventTypes } from "@/hooks/query/event/use-event-type";
 import { useEvents } from "@/hooks/query/event/use-events";
-import { useDebounce } from "@/hooks/use-debounce";
-import { useSyncQueryParams } from "@/hooks/use-sync-query-params";
-import { useUpdateQueryParams } from "@/hooks/use-update-query-params";
+import { useUrlFilter } from "@/hooks/use-url-filters";
 import { useEventStore } from "@/store/use-event-store";
-import { eventSessionTypeValue, eventStatusValue } from "@/utils/event-utils";
-import { format } from "date-fns";
-import {
-    ArrowUpDown,
-    Calendar,
-    Clock,
-    ListFilter,
-    MapPin,
-    MoreHorizontal,
-} from "lucide-react";
-import Link from "next/link";
-import { useEffect, useState } from "react";
-
-export type SortByType = "date-asc" | "date-desc" | "name-asc" | "name-desc";
+import { Loader2 } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
 
 export default function AdminEventPage() {
-    const [search, setSearch] = useState("");
-    const [status, setStatus] = useState("0");
-    const [type, setType] = useState("all");
-    const [sortBy, setSortBy] = useState("date-desc");
+    const [nextCursor, setNextCursor] = useState<string | null>(null);
+    const [hasMore, setHasMore] = useState(false);
+    const [isLoadingMore, setIsLoadingMore] = useState(false);
 
-    const debouncedSearch = useDebounce(search, 500);
+    const {
+        events,
+        setEvents,
+        setIsEventsLoading,
+        isEventsLoading,
+        addMoreEvents,
+    } = useEventStore();
 
-    useUpdateQueryParams(
-        "/event",
-        { search, status, type, sortBy },
-        { search: "", status: "0", type: "all", sortBy: "date-desc" },
-        { replace: true }
-    );
+    const { filters } = useUrlFilter();
 
-    useSyncQueryParams({
-        params: {
-            search: [search, setSearch],
-            status: [status, setStatus],
-            type: [type, setType],
-            sortBy: [sortBy, setSortBy],
-        },
-    });
-    const { events, setEvents, setIsEventsLoading, isEventsLoading } =
-        useEventStore();
+    const { data: eventsData } = useEvents({ filters, nextCursor });
 
-    const { data: eventTypes } = useEventTypes();
-
-    const { data: eventsData, isPending } = useEvents({
-        type,
-        status,
-        sortBy,
-        search: debouncedSearch,
-    });
+    const filterKey = useMemo(() => JSON.stringify(filters), [filters]);
 
     useEffect(() => {
-        setIsEventsLoading(isPending);
-        if (eventsData?.events) {
-            setEvents(eventsData.events);
-        }
-    }, [eventsData, isEventsLoading, setEvents, setIsEventsLoading, isPending]);
+        setNextCursor(null);
+        setEvents([]);
+        setHasMore(false);
+        setIsEventsLoading(true);
+        setIsLoadingMore(false);
+    }, [filterKey, setEvents]);
 
-    const hasActiveFilters = [status !== "0" || type !== "all"].filter(Boolean);
-    const isSearching = search !== debouncedSearch;
+    useEffect(() => {
+        if (!eventsData?.events) return;
+
+        if (nextCursor === null) {
+            setEvents(eventsData.events);
+            setIsEventsLoading(false);
+        } else {
+            addMoreEvents(eventsData.events);
+        }
+        setHasMore(eventsData.hasMore || false);
+        setIsLoadingMore(false);
+    }, [eventsData, nextCursor, setEvents, setIsEventsLoading, addMoreEvents]);
+
+    const handleLoadMore = () => {
+        if (!eventsData?.hasMore || isLoadingMore) {
+            return;
+        }
+        setIsLoadingMore(true);
+        setTimeout(() => {
+            if (!eventsData?.nextCursor) return;
+            setNextCursor(eventsData.nextCursor);
+        }, 500);
+    };
 
     return (
         <div className="w-full min-h-screen flex flex-col flex-1">
@@ -115,183 +90,28 @@ export default function AdminEventPage() {
                 </div>
             </Header>
             <PageWrapper>
-                <div className="flex gap-2 items-center justify-between">
-                    <Input
-                        type="search"
-                        placeholder="Search events by name, location, or description..."
-                        className="w-full md:w-sm bg-card"
-                        value={search}
-                        onChange={(e) => setSearch(e.target.value)}
-                    />
-                    <div className="flex gap-2">
-                        <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                                <Button
-                                    variant={
-                                        hasActiveFilters.length > 0
-                                            ? "default"
-                                            : "outline"
-                                    }
-                                >
-                                    <ListFilter />
-                                    Filter
-                                    {hasActiveFilters.length > 0 && (
-                                        <div className="h-4 w-4 rounded-full bg-primary-foreground flex items-center justify-center">
-                                            <span className="font-medium text-xs text-primary">
-                                                {hasActiveFilters.length}
-                                            </span>
-                                        </div>
-                                    )}
-                                </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent>
-                                <DropdownMenuGroup>
-                                    <DropdownMenuLabel>Type:</DropdownMenuLabel>
-                                    <DropdownMenuSub>
-                                        <DropdownMenuSubTrigger>
-                                            {eventTypes &&
-                                            eventTypes.eventTypes.length > 0
-                                                ? eventTypes.eventTypes.find(
-                                                      (eventType) =>
-                                                          eventType.id === type
-                                                  )?.name || "All"
-                                                : "All"}
-                                        </DropdownMenuSubTrigger>
-                                        <DropdownMenuPortal>
-                                            <DropdownMenuSubContent>
-                                                <DropdownMenuCheckboxItem
-                                                    checked={type === "all"}
-                                                    onCheckedChange={() =>
-                                                        setType("all")
-                                                    }
-                                                >
-                                                    All
-                                                </DropdownMenuCheckboxItem>
-                                                {eventTypes &&
-                                                eventTypes.eventTypes.length > 0
-                                                    ? eventTypes.eventTypes.map(
-                                                          (eventType) => (
-                                                              <DropdownMenuCheckboxItem
-                                                                  checked={
-                                                                      type ===
-                                                                      eventType.id
-                                                                  }
-                                                                  key={
-                                                                      eventType.id
-                                                                  }
-                                                                  onCheckedChange={() =>
-                                                                      setType(
-                                                                          eventType.id
-                                                                      )
-                                                                  }
-                                                              >
-                                                                  {
-                                                                      eventType.name
-                                                                  }
-                                                              </DropdownMenuCheckboxItem>
-                                                          )
-                                                      )
-                                                    : null}
-                                            </DropdownMenuSubContent>
-                                        </DropdownMenuPortal>
-                                    </DropdownMenuSub>
-                                </DropdownMenuGroup>
-                                <DropdownMenuSeparator />
-                                <DropdownMenuGroup>
-                                    <DropdownMenuLabel>
-                                        Status:
-                                    </DropdownMenuLabel>
-                                    <DropdownMenuSub>
-                                        <DropdownMenuSubTrigger>
-                                            {eventStatusValue[Number(status)] ||
-                                                "All"}
-                                        </DropdownMenuSubTrigger>
-                                        <DropdownMenuPortal>
-                                            <DropdownMenuSubContent>
-                                                <DropdownMenuCheckboxItem
-                                                    checked={status === "0"}
-                                                    onCheckedChange={() =>
-                                                        setStatus("0")
-                                                    }
-                                                >
-                                                    All
-                                                </DropdownMenuCheckboxItem>
-                                                {Object.entries(
-                                                    eventStatus
-                                                ).map(([key, value]) => (
-                                                    <DropdownMenuCheckboxItem
-                                                        checked={status === key}
-                                                        key={key}
-                                                        onCheckedChange={() =>
-                                                            setStatus(key)
-                                                        }
-                                                    >
-                                                        {value}
-                                                    </DropdownMenuCheckboxItem>
-                                                ))}
-                                            </DropdownMenuSubContent>
-                                        </DropdownMenuPortal>
-                                    </DropdownMenuSub>
-                                </DropdownMenuGroup>
-                            </DropdownMenuContent>
-                        </DropdownMenu>
-                        <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                                <Button
-                                    variant="outline"
-                                    className="bg-transparent flex-1 sm:flex-none"
-                                >
-                                    <ArrowUpDown className="w-4 h-4" />
-                                    Sort
-                                </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                                <DropdownMenuLabel>Sort by</DropdownMenuLabel>
-                                <DropdownMenuSeparator />
-                                <DropdownMenuCheckboxItem
-                                    checked={sortBy === "date-desc"}
-                                    onCheckedChange={() =>
-                                        setSortBy("date-desc")
-                                    }
-                                >
-                                    Date (Newest First)
-                                </DropdownMenuCheckboxItem>
-                                <DropdownMenuCheckboxItem
-                                    checked={sortBy === "date-asc"}
-                                    onCheckedChange={() =>
-                                        setSortBy("date-asc")
-                                    }
-                                >
-                                    Date (Oldest First)
-                                </DropdownMenuCheckboxItem>
-                                <DropdownMenuCheckboxItem
-                                    checked={sortBy === "name-asc"}
-                                    onCheckedChange={() =>
-                                        setSortBy("name-asc")
-                                    }
-                                >
-                                    Name (A-Z)
-                                </DropdownMenuCheckboxItem>
-                                <DropdownMenuCheckboxItem
-                                    checked={sortBy === "name-desc"}
-                                    onCheckedChange={() =>
-                                        setSortBy("name-desc")
-                                    }
-                                >
-                                    Name (Z-A)
-                                </DropdownMenuCheckboxItem>
-                            </DropdownMenuContent>
-                        </DropdownMenu>
-                    </div>
-                </div>
-                {isEventsLoading || isSearching ? (
+                <EventFilter />
+                {isEventsLoading ? (
                     <EventsCardSkeleton />
                 ) : events.length > 0 ? (
-                    <div className="columns-1 md:columns-2 lg:columns-3 gap-4">
-                        {events.map((event) => (
-                            <EventCard key={event.id} event={event} />
-                        ))}
-                    </div>
+                    <>
+                        <LoadMoreWrapper
+                            hasMore={hasMore}
+                            isLoading={isLoadingMore}
+                            loadMore={handleLoadMore}
+                            loadingStateMessage="loading more events..."
+                        >
+                            <div className="columns-1 sm:columns-2 lg:columns-3 gap-4">
+                                {events.map((event, index) => (
+                                    <EventCard
+                                        key={event.id}
+                                        event={event}
+                                        index={index}
+                                    />
+                                ))}
+                            </div>
+                        </LoadMoreWrapper>
+                    </>
                 ) : (
                     <Empty>
                         <EmptyHeader>

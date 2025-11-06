@@ -1,4 +1,5 @@
-import { Attendance } from "@/hooks/query/event/use-event-attendace";
+
+import { EventAttendance } from "@/store/use-event-attendace-store";
 import { fetchApi } from ".";
 import { getSession } from "next-auth/react";
 
@@ -13,7 +14,7 @@ interface CreateAttendaceResponse {
     error?: string;
     message?: string;
     type?: string;
-    attendance?: Attendance
+    attendance?: EventAttendance
 }
 
 export const getAllAttendance = async () => {

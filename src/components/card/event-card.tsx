@@ -7,7 +7,6 @@ import {
     DropdownMenuShortcut,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { eventSessionTypeValue, eventStatusValue } from "@/utils/event-utils";
 import { format } from "date-fns";
 import {
     ArrowLeftFromLine,
@@ -29,8 +28,10 @@ import Link from "next/link";
 import RoleBasedRender from "../role-based-render";
 import { useState } from "react";
 import { EventWithSessions } from "@/store/use-event-store";
+import { eventSessionType, eventStatus } from "@/constant";
+import { Card } from "../ui/card";
 
-export function EventCard({ event }: { event: EventWithSessions }) {
+export function EventCard({ event, index }: { event: EventWithSessions, index?:number }) {
     const [interseted, setInterseted] = useState(false);
 
     const handleInterseted = (e: React.MouseEvent<HTMLButtonElement>) => {
@@ -43,26 +44,18 @@ export function EventCard({ event }: { event: EventWithSessions }) {
             href={`/event/${event.id}`}
             className="break-inside-avoid block mb-4"
         >
-            <div className="bg-card border p-4 rounded-md hover:bg-muted/30 transition-colors flex flex-col gap-4">
+            <Card className="flex flex-col gap-4">
                 <div className="flex flex-col gap-3">
                     <div className="w-full flex items-start justify-between gap-4">
                         <h2 className="text-xl font-normal text-foreground leading-tight flex-1">
                             {event.name}
                         </h2>
                         <div className="flex items-center gap-2 shrink-0">
-                            {event.eventType && (
-                                <Badge
-                                    variant="outline"
-                                    className="text-xs font-medium uppercase tracking-wide"
-                                >
-                                    {event.eventType.name}
-                                </Badge>
-                            )}
                             <Badge
                                 variant="outline"
-                                className="text-xs font-medium uppercase tracking-wide"
+                                className="text-xs"
                             >
-                                {eventStatusValue[event.status]}
+                                {eventStatus[event.status]}
                             </Badge>
                             <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
@@ -110,6 +103,14 @@ export function EventCard({ event }: { event: EventWithSessions }) {
                         </div>
                     </div>
                     <div className="flex flex-wrap gap-4 text-xs text-muted-foreground font-light">
+                        {event.eventType && (
+                                <Badge
+                                    variant="outline"
+                                    className="text-xs"
+                                >
+                                    {event.eventType.name}
+                                </Badge>
+                            )}
                         <div className="flex items-center gap-2">
                             <Calendar className="w-4 h-4 shrink-0" />
                             <span className="text-foreground font-light">
@@ -136,7 +137,7 @@ export function EventCard({ event }: { event: EventWithSessions }) {
                             className="px-3 py-2 rounded bg-green-600/10s flex items-center justify-between text-xs border border-border/50 bg-muted/20"
                         >
                             <span className="font-light text-foreground">
-                                {eventSessionTypeValue[session.type]}
+                                {eventSessionType[session.type]}
                             </span>
                             <RoleBasedRender allowedRoles={["admin"]}>
                                 <div className="flex gap-2">
@@ -220,7 +221,7 @@ export function EventCard({ event }: { event: EventWithSessions }) {
                         </div>
                     </RoleBasedRender>
                 </div>
-            </div>
+            </Card>
         </Link>
     );
 }

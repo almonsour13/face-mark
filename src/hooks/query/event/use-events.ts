@@ -8,31 +8,24 @@ interface Response {
     error?: string;
     newEvent?: EventWithSessions;
     events?: EventWithSessions[];
+    hasMore?: boolean;
+    nextCursor?: string | null;
 }
 interface UseEventProps {
-    type: string;
-    status: string;
-    sortBy: string;
-    search?: string;
-    count?: number;
+    filters: Record<string, string>;
+    nextCursor?: string | null;
 }
 
 export const useEvents = ({
-    type,
-    status,
-    sortBy,
-    search = "",
-    count = 20,
+    filters,
+    nextCursor
 }: UseEventProps) => {
     return useQuery<Response, Error>({
-        queryKey: ["events", type, status, sortBy, search, count],
+        queryKey: ["events", nextCursor, filters],
         queryFn: async () => {
             const params = new URLSearchParams({
-                type,
-                status,
-                sortBy,
-                count: count.toString(),
-                ...(search && { search }), // Only add if search has value
+                ...filters,
+                ...(nextCursor && { nextCursor }),
             });
 
             const response = await fetchApi(`/api/event?${params.toString()}`);

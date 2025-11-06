@@ -22,9 +22,9 @@ import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { Avatar, AvatarImage } from "../ui/avatar";
 import { Button } from "../ui/button";
-import { User } from "@/hooks/query/user/use-users";
+import { UserWithDetails } from "@/store/use-user-store";
 interface StudentInformationDialogProps {
-    profileInfo: User | null;
+    profileInfo: UserWithDetails | null;
 }
 export default function StudentInformationDialog({
     profileInfo,

@@ -11,22 +11,13 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
     const { data:userDetailsData, isPending:isUserDetailsLoading } = useUserDetails(userId);
     const { setUserDetails, setUserDetailsLoading } = useUserDetailsStore();
-
-    const { data: attendanceData, isPending: isPendingAttendances } = useUserAttendances(userId);
-    const { setUserAttendances, setUserAttendanceLoading } = useUserAttendanceStore();
-
-    useEffect(() => {
-        setUserAttendanceLoading(isPendingAttendances);
-        if(attendanceData?.success){
-            setUserAttendances(attendanceData.userAttendances);
-        }
-    }, [attendanceData, isPendingAttendances, setUserAttendances, setUserAttendanceLoading]);
-
+    
     useEffect(() => {
         setUserDetailsLoading(isUserDetailsLoading);
         if (userDetailsData?.success) {
             setUserDetails(userDetailsData.userDetails);
         }
     }, [userDetailsData, isUserDetailsLoading, setUserDetails, setUserDetailsLoading]);
+    
     return <>{children}</>;
 }

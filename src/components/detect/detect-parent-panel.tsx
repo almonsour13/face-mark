@@ -4,10 +4,9 @@ import CameraAreaInterface from "@/components/detect/camera-area-interface";
 import RecentAttendedUsersPanel from "@/components/detect/recent-attended-users-panel";
 import { levelsValue } from "@/constant";
 import { useFaceDetectionContext } from "@/context/face-detect-context";
-import { Attendance } from "@/hooks/query/event/use-event-attendace";
 import { useFaces } from "@/hooks/query/use-faces";
 import { createAttendance } from "@/lib/api/attendance";
-import { useEventAttendanceStore } from "@/store/use-event-attendace-store";
+import { EventAttendance, useEventAttendanceStore } from "@/store/use-event-attendace-store";
 import { useEventDetailsStore } from "@/store/use-event-details-store";
 import { Face, useFacesStore } from "@/store/use-faces-store";
 import { drawFaceBox, matchFaceWithUsers } from "@/utils/face-detection-utils";
@@ -77,7 +76,7 @@ export default function DetectParentPanel() {
     const [cooldownTimers, setCooldownTimers] = useState<Map<string, number>>(
         new Map()
     );
-    const [lastUserAttended, setLastUserAttended] = useState<Attendance | null>(
+    const [lastUserAttended, setLastUserAttended] = useState<EventAttendance | null>(
         null
     );
     const { addEventAttendance, eventAttendance } = useEventAttendanceStore();

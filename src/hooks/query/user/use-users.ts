@@ -7,22 +7,20 @@ import { useQuery } from "@tanstack/react-query";
 interface Response {
     success: boolean;
     users: UserWithDetails[];
+    hasMore?: boolean;
+    nextCursor?: string | null;
 }
 interface UseUserProps {
-    course?: string;
-    level?: string;
-    search?: string;
-    count?: number;
+    filters: Record<string, string>;
+    nextCursor?: string | null;
 }
-export const useUsers = ({course, level, search, count }: UseUserProps) => {
+export const useUsers = ({filters, nextCursor}: UseUserProps) => {
     return useQuery<Response, Error>({
-        queryKey: ["users", course, level, search, count],
+        queryKey: ["users", nextCursor, filters],
         queryFn: async () => {
              const params = new URLSearchParams({
-                ...count && { count: count.toString() },
-                ...(course && { course }),
-                ...(level && { level }),
-                ...(search && { search }), // Only add if search has value
+                ...filters,
+                ...(nextCursor && { nextCursor }),
             });
             const response = await fetchApi(`/api/user?${params.toString()}`);
             return response;

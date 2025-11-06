@@ -45,13 +45,6 @@ export default function Page() {
         userDetails?.studentDetails &&
         levelsValue[userDetails.studentDetails?.level.name];
 
-    const statistics = [
-        { statName: "Total Attendance", value: 20 },
-        { statName: "Total Event Attended", value: 20 },
-        { statName: "On Time", value: 20 },
-        { statName: "Late", value: 20 },
-    ];
-
     return (
         <div className="w-full min-h-screen">
             <Header>

@@ -3,6 +3,7 @@
 import type React from "react";
 
 import { motion } from "framer-motion";
+import { Card } from "./ui/card";
 
 interface StatisticItem {
     name: string;
@@ -21,13 +22,13 @@ export default function StatisticsCard({
     title = "Statistics",
 }: StatisticsCardProps) {
     return (
-        <div className="flex flex-col gap-2">
+        <div className="flex flex-col gap-2 sticky top-0">
             <h2 className="text-lg font-light">Statistic</h2>
             <div className="grid grid-cols-2 gap-2">
                 {statistics.map((stat, index) => (
-                    <div
+                    <Card
                         key={index}
-                        className="flex flex-col gap-2 p-4 rounded-lg bg-card border backdrop-blur-sm hover:border-border/80 transition-colors"
+                        className="gap-2"
                     >
                         <div className="flex items-start justify-between">
                             <span className="text-xs text-muted-foreground">
@@ -49,7 +50,7 @@ export default function StatisticsCard({
                                 </p>
                             )}
                         </div>
-                    </div>
+                    </Card>
                 ))}
             </div>
         </div>

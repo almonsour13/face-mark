@@ -1,11 +1,11 @@
-import { EventSession } from "@/hooks/query/event/use-events";
+import { Session } from "@/type";
 import { fetchApi } from ".";
 interface CreateEventProps {
     name: string;
     description: string;
     location: string;
-    eventType: string;
-    eventSessions: EventSession[];
+    eventTypeId: string;
+    eventSessions: Session[];
     eventDate: Date;
     status: number;
 }

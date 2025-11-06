@@ -19,8 +19,8 @@ export const useSignin = () => {
     const [processStatus, setProcessStatus] = useState<ProcessStatus>("idle");
 
     const [formData, setFormData] = useState<SignInFormData>({
-        email: "almonsoursalida@gmail.com",
-        password: "monsour13",
+        email: "admin@gmail.com",
+        password: "admin123",
     });
     
     const [errors, setErrors] = useState<

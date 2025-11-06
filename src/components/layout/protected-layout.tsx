@@ -24,12 +24,12 @@ export default function ProtectedLayout({ children }: ProtectedLayoutProps) {
     if (status === "loading") {
         return (
             <div className="flex items-center justify-center h-screen">
-                <p>Checking authentication...</p>
+                <p>loading...</p>
             </div>
         );
     }
     if(status === "unauthenticated" || !session){
-        router.replace("/auth/signin");
+        router.push("/auth/signin");
     }
 
     // ✅ Don’t render children if not authenticated

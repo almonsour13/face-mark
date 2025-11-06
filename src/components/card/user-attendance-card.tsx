@@ -1,8 +1,10 @@
-import { UserAttendances } from "@/hooks/query/user/use-user-attendances";
-import { eventSessionTypeValue } from "@/utils/event-utils";
+
 import { Calendar, Clock, CheckCircle2, AlertCircle } from "lucide-react";
 import { Badge } from "../ui/badge";
 import { format } from "date-fns";
+import { UserAttendances } from "@/store/use-user-attendance-store";
+import { eventSessionType } from "@/constant";
+import { Card } from "../ui/card";
 
 export default function UserAttendanceCard({
     attendance,
@@ -14,22 +16,21 @@ export default function UserAttendanceCard({
     const isFaceRecognition = attendance.method === 1;
 
     return (
-        <div
+        <Card
             key={attendance.id}
-            className="bg-card border p-4 rounded-md hover:border-border/50 transition-all hover:shadow-lg"
         >
             <div className="flex flex-col gap-4">
                 {/* Header */}
                 <div className="flex items-start justify-between gap-4">
                     <div className="flex-1 space-y-4">
                         <h3 className="text-lg font-light text-foreground leading-tight">
-                            {attendance.event.name}
+                            {attendance.event?.name}
                         </h3>
                         <div className="flex items-center gap-2 text-xs font-light text-muted-foreground">
                             <Calendar className="h-3 w-3" />
                             <span className="text-foreground">
                                 {format(
-                                    new Date(attendance.event.eventDate),
+                                    new Date(attendance.event?.eventDate),
                                     "MMMM dd, yyyy"
                                 )}
                             </span>
@@ -53,7 +54,7 @@ export default function UserAttendanceCard({
                 {/* Details */}
                 <div className="flex flex-wrap gap-4 text-xs font-light text-muted-foreground">
                     <span className="text-foreground">
-                        {eventSessionTypeValue[attendance.session.type]}
+                        {eventSessionType[attendance.session.type]}
                     </span>
                     <div className="flex items-center gap-2">
                         <Clock className="h-3 w-3" />
@@ -80,6 +81,6 @@ export default function UserAttendanceCard({
                     </div>
                 </div>
             </div>
-        </div>
+        </Card>
     );
 }

@@ -10,7 +10,7 @@ export const useCreateEvents = () => {
         name: "",
         description: "",
         location: "",
-        eventType: "Meeting",
+        eventTypeId: "",
         eventDate: new Date(),
         status: 2,
     });
@@ -143,7 +143,7 @@ export const useCreateEvents = () => {
                     name: "",
                     description: "",
                     location: "",
-                    eventType: "",
+                    eventTypeId: "",
                     eventDate: new Date(),
                     status: 1,
                 });

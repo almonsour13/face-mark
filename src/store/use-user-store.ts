@@ -14,11 +14,15 @@ interface UserStore {
     isUsersLoading: boolean;
     setUsersLoading: (isUsersLoading: boolean) => void
     users: UserWithDetails[];
-    setUsers: (user: UserWithDetails[]) => void
+    setUsers: (user: UserWithDetails[]) => void;
+    addMoreUsers: (users: UserWithDetails[]) => void;
 }
 export const userUserStore = create<UserStore>((set) => ({
     isUsersLoading: true,
     setUsersLoading: (isUsersLoading: boolean) => set({ isUsersLoading }),
     users: [],
     setUsers: (users: UserWithDetails[]) => set({ users }),
+    addMoreUsers: (users: UserWithDetails[]) =>
+        set((state) => ({ users: [...state.users, ...users] })),
+
 }));

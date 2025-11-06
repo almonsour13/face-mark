@@ -6,21 +6,21 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { format } from "date-fns";
 
 import { Button } from "@/components/ui/button";
-import {
-    type Attendance,
-    useEventAttendance,
-} from "@/hooks/query/event/use-event-attendace";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { ArrowDown, ArrowUp } from "lucide-react";
-import { useEffect, useState } from "react";
-import RecentAttendedUsers from "./recent-attended-users";
-import { useEventAttendanceStore } from "@/store/use-event-attendace-store";
-import { Badge } from "../ui/badge";
-import { useParams } from "next/navigation";
 import { levelsValue } from "@/constant";
+import { useEventAttendance } from "@/hooks/query/event/use-event-attendace";
+import {
+    EventAttendance,
+    useEventAttendanceStore,
+} from "@/store/use-event-attendace-store";
+import { ArrowDown, ArrowUp } from "lucide-react";
+import { useParams } from "next/navigation";
+import { useEffect, useState } from "react";
+import { Badge } from "../ui/badge";
+import RecentAttendedUsers from "./recent-attended-users";
 
 interface RecentAttendedUsersPanelProps {
-    lastUserAttended: Attendance | null;
+    lastUserAttended: EventAttendance | null;
 }
 
 export default function RecentAttendedUsersPanel({
@@ -39,9 +39,6 @@ export default function RecentAttendedUsersPanel({
     const { data: eventAttendanceData, isPending: isLoading } =
         useEventAttendance({
             eventId,
-            sessionType: "0",
-            level: "all",
-            attendanceType: "0",
         });
 
     useEffect(() => {
@@ -76,7 +73,8 @@ export default function RecentAttendedUsersPanel({
                                             <AvatarImage
                                                 className="object-cover rounded"
                                                 src={
-                                                    lastUserAttended.user.face?.imageUrl ||
+                                                    lastUserAttended.user.face
+                                                        ?.imageUrl ||
                                                     "/placeholder.svg" ||
                                                     "/placeholder.svg"
                                                 }
@@ -149,9 +147,7 @@ export default function RecentAttendedUsersPanel({
             )}
             <div className="flex-1 flex flex-col min-h-0 gap-4">
                 <div className="flex items-center justify-between">
-                    <h2 className="text-lg font-light">
-                        Recent Attendance
-                    </h2>
+                    <h2 className="text-lg font-light">Recent Attendance</h2>
                     <Button
                         variant="ghost"
                         size="icon"

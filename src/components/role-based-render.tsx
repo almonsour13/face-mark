@@ -21,7 +21,6 @@ export default function RoleBasedRender({
 
     const role = session && session.user.role && roleValue[session.user.role];
     if (role && !allowedRoles.includes(role)) {
-       if(showUnauthorized) unauthorized();
        return null;
     }
 

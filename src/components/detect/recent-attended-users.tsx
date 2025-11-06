@@ -1,24 +1,18 @@
 "use client";
-import Image from "next/image";
-import { motion, AnimatePresence } from "framer-motion";
 import {
     Item,
     ItemContent,
-    ItemDescription,
     ItemGroup,
     ItemHeader,
-    ItemMedia,
-    ItemTitle,
+    ItemMedia
 } from "@/components/ui/item";
-import { format } from "date-fns";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Attendance } from "@/hooks/query/event/use-event-attendace";
-import { Badge } from "../ui/badge";
-import { levelsValue } from "@/constant";
+import { EventAttendance } from "@/store/use-event-attendace-store";
+import { AnimatePresence, motion } from "framer-motion";
 import EventAttendanceCard from "../card/event-attendance-card";
 
 interface AttendedUsersProps {
-    attendance: Attendance[];
+    attendance: EventAttendance[];
     isEvenAttendanceLoading?: boolean;
 }
 

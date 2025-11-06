@@ -1,9 +1,10 @@
 
-import { Session } from "inspector";
+import { Event, EventType, Session } from "@/type";
 import { create } from "zustand";
 
 export interface EventDetails extends Event{
     eventSessions: Session[];
+    eventType:EventType
 }
 interface EventDetailsProps {
     isEventDetailsLoading: boolean;

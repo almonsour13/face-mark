@@ -4,14 +4,25 @@ import { useQuery } from "@tanstack/react-query";
 
 interface Response {
     success: boolean;
-    userAttendances: UserAttendances[]
+    userAttendances: UserAttendances[];
+    hasMore?: boolean;
+    nextCursor?: string | null;
 }
-export const useUserAttendances = (userId: string) => {
+interface UserUserAttendancesProps {
+    userId: string;
+    filters: Record<string, string>;
+    nextCursor?: string | null;
+}
+export const useUserAttendances = ({userId, filters, nextCursor,}: UserUserAttendancesProps) => {
     return useQuery<Response, Error>({
-        queryKey: ["users-attendance", userId],
+        queryKey: ["users-attendance", userId, nextCursor],
         queryFn: async () => {
-            const response = await fetchApi(`/api/user/${userId}/attendance`);
-            console.log("response:", response)
+            
+            const params = new URLSearchParams({
+                ...filters,
+                ...(nextCursor && { nextCursor }), // Only add if search has value
+            });
+            const response = await fetchApi(`/api/user/${userId}/attendance?${params.toString()}`);
             return response;
         },
     });

@@ -1,4 +1,3 @@
-import { User } from "@/hooks/query/user/use-users";
 import { format } from "date-fns";
 import {
     Calendar,
@@ -11,12 +10,20 @@ import Link from "next/link";
 import Image from "next/image";
 import { levelsValue, roleValue } from "@/constant";
 import { Badge } from "../ui/badge";
+import { UserWithDetails } from "@/store/use-user-store";
+import { Card } from "../ui/card";
 
-export default function UserCard({ user }: { user: User }) {
+export default function UserCard({ user, className }: { user: UserWithDetails, className?:string }) {
+    const { name, studentDetails } = user;
+
+    const studentId = studentDetails?.studentId;
+    const course =
+        studentDetails?.course.name + ` (${studentDetails?.course.code})`;
+    const level = studentDetails && levelsValue[studentDetails?.level.name];
     return (
         <Link href={`/user/${user.id}`} className="block group">
-            <div className="p-4 border border-border/30 rounded-lg hover:border-border/50 transition-all hover:shadow-lg bg-card">
-                <div className="flex gap-6">
+            <Card className={`${className}`}>
+                <div className="flex gap-4">
                     {/* Profile Image */}
                     <div className="h-28 w-28 rounded-lg overflow-hidden bg-muted flex-shrink-0 border border-border/30 relative">
                         <Image
@@ -38,41 +45,34 @@ export default function UserCard({ user }: { user: User }) {
                         {/* Header */}
                         <div className="flex items-start justify-between gap-4">
                             <div className="flex-1 min-w-0 space-y-1">
-                                <h3 className="text-lg font-light text-foreground truncate group-hover:text-foreground transition-colors">
+                                <h3 className="text-xl font-light text-foreground truncate group-hover:text-foreground transition-colors">
                                     {user.name}
                                 </h3>
                                 {user.studentDetails?.studentId && (
                                     <p className="text-xs font-light text-muted-foreground">
-                                        {user.studentDetails.studentId}
+                                        {user.email}
                                     </p>
                                 )}
                             </div>
                             <Badge variant="outline" className="text-xs">
                                 {roleValue[user.role] || user.role}
                             </Badge>
-                            <span className="px-3 py-1 rounded-full border border-border/30 text-xs font-light uppercase tracking-wide shrink-0">
-                                {roleValue[user.role] || user.role}
-                            </span>
                         </div>
 
                         {/* Details */}
                         {user.studentDetails && (
-                            <div className="space-y-1">
-                                <p className="text-sm font-light text-foreground">
-                                    {user.studentDetails.course.name}
-                                </p>
+                            <div className="">
                                 <p className="text-xs font-light text-muted-foreground">
-                                    {levelsValue[
-                                        user.studentDetails.level.name
-                                    ] || user.studentDetails.level.name}
+                                    {[studentDetails.studentId, course, level]
+                                        .filter(Boolean)
+                                        .join(" | ")}
                                 </p>
                             </div>
                         )}
 
                         {/* Footer */}
-                        <div className="flex items-center justify-between pt-2 border-t border-border/20 mt-auto">
+                        <div className="flex items-center justify-between">
                             <div className="flex items-center gap-2 text-xs font-light text-muted-foreground">
-                                <Calendar className="h-3 w-3" />
                                 <span>
                                     Joined{" "}
                                     {format(user.createdAt, "MMM dd, yyyy")}
@@ -85,7 +85,7 @@ export default function UserCard({ user }: { user: User }) {
                         </div>
                     </div>
                 </div>
-            </div>
+            </Card>
         </Link>
     );
 }
