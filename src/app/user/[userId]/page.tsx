@@ -1,18 +1,16 @@
 "use client";
 
+import BackButton from "@/components/back-button";
+import UserAttendanceDisplay from "@/components/features/user/user-attendance-list";
 import Header from "@/components/layout/nav-header";
 import HeaderTitle from "@/components/layout/nav-header-title";
+import PageWrapper from "@/components/page-wrapper";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import UserAttendanceDisplay from "@/components/features/user/user-attendance-list";
-import StatisticsCard from "@/components/statistics-card";
 import { levelsValue } from "@/constant";
 import { useUserDetailsStore } from "@/store/use-user-details-store";
-import { CheckCircle2, Mail, MoreHorizontal, Shield } from "lucide-react";
-import PageWrapper from "@/components/page-wrapper";
-import { SidebarTriggerButton } from "@/components/layout/app-side-bar";
-import BackButton from "@/components/back-button";
+import { Mail, MoreHorizontal, Shield } from "lucide-react";
 
 const roleValue: Record<number, string> = {
     1: "Student",
