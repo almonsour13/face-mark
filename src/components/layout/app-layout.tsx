@@ -7,7 +7,7 @@ import { useLevel } from "@/hooks/query/use-level";
 import { useLevelStore } from "@/store/use-level-store";
 import { useEffect } from "react";
 import { useCourses } from "@/hooks/query/use-courses";
-import { useCoursesStore } from "@/store/use-couse-store";
+import { useCoursesStore } from "@/store/use-course-store";
 import { useEventTypes } from "@/hooks/query/event/use-event-type";
 import { useEventTypesStore } from "@/store/use-event-types-store";
 

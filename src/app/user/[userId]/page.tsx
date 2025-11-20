@@ -5,7 +5,7 @@ import HeaderTitle from "@/components/layout/nav-header-title";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import UserAttendanceDisplay from "@/components/user/user-attendance-list";
+import UserAttendanceDisplay from "@/components/features/user/user-attendance-list";
 import StatisticsCard from "@/components/statistics-card";
 import { levelsValue } from "@/constant";
 import { useUserDetailsStore } from "@/store/use-user-details-store";

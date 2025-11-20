@@ -9,7 +9,7 @@ export default function DashboardHeader() {
     
     return (
         <>
-            <Header className="border-b-0">
+            <Header>
                 <div className="">
                     <SidebarTriggerButton />
                 </div>

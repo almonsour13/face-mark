@@ -34,7 +34,8 @@ export function useUrlFilter({ defaultValue = {} }: UseUrlFilterProps = {}) {
             if (
                 newFilters[k] === "" ||
                 newFilters[k] === "all" ||
-                newFilters[k] === "0"
+                newFilters[k] === "0" ||
+                newFilters[k] === "false"
             ) {
                 delete newFilters[k];
             }
@@ -57,6 +58,7 @@ export function useUrlFilter({ defaultValue = {} }: UseUrlFilterProps = {}) {
         () =>
             Object.entries(filters).filter(
                 ([key, value]) =>
+                    key !== "isPriority" &&
                     key !== "search" &&
                     key !== "sortBy" &&
                     value !== "all" &&

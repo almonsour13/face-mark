@@ -23,12 +23,11 @@ import { ArrowUpDown, ListFilter } from "lucide-react";
 export default function EventFilter() {
     const { data: eventTypes } = useEventTypes();
 
-    const { filters, setFilter, hasActiveFilters } =
-        useUrlFilter({
-            defaultValue: {
-                sortBy: "date-desc",
-            },
-        });
+    const { filters, setFilter, hasActiveFilters } = useUrlFilter({
+        defaultValue: {
+            sortBy: "date-desc",
+        },
+    });
 
     return (
         <div className="flex gap-2 items-center justify-between w-full ">
@@ -43,6 +42,19 @@ export default function EventFilter() {
 
             <div className="flex gap-2">
                 {/* 🔹 Filter Dropdown */}
+                <Button
+                    variant={
+                        filters.isPriority === "true" ? "default" : "outline"
+                    }
+                    onClick={() =>
+                        setFilter(
+                            "isPriority",
+                            filters.isPriority === "true" ? "false" : "true"
+                        )
+                    }
+                >
+                    Priority
+                </Button>
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                         <Button
@@ -159,7 +171,7 @@ export default function EventFilter() {
                     <DropdownMenuTrigger asChild>
                         <Button
                             variant="outline"
-                            className="bg-transparent flex-1 sm:flex-none"
+                            className="flex-1 sm:flex-none"
                         >
                             <ArrowUpDown className="w-4 h-4" />
                             Sort

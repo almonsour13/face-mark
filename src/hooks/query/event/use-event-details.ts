@@ -1,9 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
 import { fetchApi } from "@/lib/api";
-import { EventDetails } from "@/store/use-event-details-store";
+import { EventWithSessions } from "@/store/use-event-store";
 interface Response {
     sucess: boolean;
-    event: EventDetails;
+    event: EventWithSessions;
+    totalStudents?: number;
 }
 export const useEventDetails = (eventId: string) => {
     return useQuery<Response, Error>({

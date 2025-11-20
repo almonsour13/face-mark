@@ -10,6 +10,7 @@ interface Response {
     events?: EventWithSessions[];
     hasMore?: boolean;
     nextCursor?: string | null;
+    totalStudents?: number;
 }
 interface UseEventProps {
     filters: Record<string, string>;

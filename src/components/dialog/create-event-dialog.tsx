@@ -25,6 +25,7 @@ import DialogSheetWrapper from "./dialog-sheet-wrapper";
 import AlertMessageDialog from "./alert-message-dialog";
 import { useCreateEvents } from "@/hooks/use-create-event";
 import { toast } from "sonner";
+import EventTypeDialog from "./event-type-dialog";
 
 export type SessionType = "Morning" | "Afternoon" | "Evening";
 interface CreateEventDialogProps {
@@ -53,10 +54,15 @@ export default function CreateEventDialog({
         formatDate,
         availableSessionTypes,
         isCreateEventLoading,
+        isFormDirty,
+        isValid,
     } = useCreateEvents();
 
-    const { data: eventTypesData, isPending: isEventTypesLoading } =
-        useEventTypes();
+    const {
+        data: eventTypesData,
+        isPending: isEventTypesLoading,
+        refetch,
+    } = useEventTypes();
 
     const handleDiscard = () => {
         setFormData({
@@ -71,29 +77,6 @@ export default function CreateEventDialog({
         toast.success("Changes discarded");
     };
 
-    const isValid =
-        formData.name.trim() !== "" &&
-        formData.eventDate instanceof Date &&
-        eventSessions.length > 0 &&
-        eventSessions.every(
-            (session) =>
-                session.startTime.trim() !== "" && session.endTime.trim() !== ""
-        );
-
-    const isFormDirty =
-        formData.name.trim() !== "" ||
-        formData.description.trim() !== "" ||
-        formData.location.trim() !== "" ||
-        (eventSessions.length >= 1 &&
-            eventSessions.some(
-                (session) =>
-                    session.startTime.trim() !== "09:00 AM" || // or your default
-                    session.endTime.trim() !== "12:00 PM" ||
-                    session.requiresTimeOut !== 1 ||
-                    session.allowEarlyTimeIn !== 1 ||
-                    session.allowEarlyTimeOut !== 1 ||
-                    session.gracePeriod !== 30
-            ));
 
     return (
         <>
@@ -167,37 +150,44 @@ export default function CreateEventDialog({
                                 <Label htmlFor="type" className="mb-2">
                                     Type
                                 </Label>
-                                <Select
-                                    value={
-                                        formData.eventTypeId ||
-                                        (eventTypesData &&
-                                            eventTypesData.eventTypes[0].id)
-                                    }
-                                    onValueChange={(value) => {
-                                        handleSelectChange(
-                                            "eventTypeId",
-                                            value
-                                        );
-                                    }}
-                                    disabled={isEventTypesLoading}
-                                >
-                                    <SelectTrigger className="w-full">
-                                        <SelectValue placeholder="Select Type" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        {eventTypesData &&
-                                            eventTypesData.eventTypes.map(
-                                                (type) => (
-                                                    <SelectItem
-                                                        key={type.id}
-                                                        value={type.id}
-                                                    >
-                                                        {type.name}
-                                                    </SelectItem>
-                                                )
-                                            )}
-                                    </SelectContent>
-                                </Select>
+                                <div className="flex gap-2">
+                                    <Select
+                                        value={
+                                            formData.eventTypeId ||
+                                            (eventTypesData &&
+                                                eventTypesData.eventTypes[0].id)
+                                        }
+                                        onValueChange={(value) => {
+                                            handleSelectChange(
+                                                "eventTypeId",
+                                                value
+                                            );
+                                        }}
+                                        disabled={isEventTypesLoading}
+                                    >
+                                        <SelectTrigger className="w-full">
+                                            <SelectValue placeholder="Select Type" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {eventTypesData &&
+                                                eventTypesData.eventTypes.map(
+                                                    (type) => (
+                                                        <SelectItem
+                                                            key={type.id}
+                                                            value={type.id}
+                                                        >
+                                                            {type.name}
+                                                        </SelectItem>
+                                                    )
+                                                )}
+                                        </SelectContent>
+                                    </Select>
+                                    <EventTypeDialog refetch={refetch}>
+                                        <Button variant="outline" size="icon">
+                                            <Plus className="h-4 w-4" />
+                                        </Button>
+                                    </EventTypeDialog>
+                                </div>
                             </div>
                             <div className="flex-1">
                                 <Label htmlFor="status" className="mb-2">

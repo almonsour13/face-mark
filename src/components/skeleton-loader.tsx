@@ -1,9 +1,10 @@
 import { Skeleton } from "@/components/ui/skeleton";
 import RoleBasedRender from "./role-based-render";
+import { Card } from "./ui/card";
 
 export function EventAttendanceSkeleton() {
     return (
-        <div className="rounded-lg border overflow-hidden">
+        <div className="rounded-lg overflow-hidden">
             <div className="flex flex-col gap-2">
                 {Array.from({ length: 5 }).map((_, i) => (
                     <div
@@ -126,7 +127,6 @@ export function UsersCardSkeleton() {
         </div>
     );
 }
-
 export function EventsCardSkeleton() {
     return (
         <div className="columns-1 md:columns-2 lg:columns-3 gap-4">

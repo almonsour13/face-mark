@@ -1,9 +1,14 @@
 "use client";
 
-import EventAttendanceList from "@/components/event/event-attendance-list";
+import BackButton from "@/components/back-button";
+import EventAttendanceList from "@/components/features/event/event-attendance-list";
 import Header from "@/components/layout/nav-header";
+import HeaderTitle from "@/components/layout/nav-header-title";
+import PageWrapper from "@/components/page-wrapper";
+import RoleBasedRender from "@/components/role-based-render";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -11,37 +16,40 @@ import {
     DropdownMenuShortcut,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import StatisticsCard from "@/components/statistics-card";
+import { eventSessionType, eventStatus, eventStatusColor } from "@/constant";
+import { useEventStats } from "@/context/event-details-context";
+import { useEventDetails } from "@/hooks/query/event/use-event-details";
 import { useEventDetailsStore } from "@/store/use-event-details-store";
 import { format } from "date-fns";
-import { Calendar, Clock, MapPin, MoreHorizontal, Scan } from "lucide-react";
+import {
+    Calendar,
+    CheckCircle2,
+    Clock,
+    Heart,
+    MapPin,
+    MoreHorizontal,
+    Target,
+    Users,
+} from "lucide-react";
 import Link from "next/link";
-import HeaderTitle from "@/components/layout/nav-header-title";
-import PageWrapper from "@/components/page-wrapper";
-import { SidebarTriggerButton } from "@/components/layout/app-side-bar";
-import RoleBasedRender from "@/components/role-based-render";
-import { useEventAttendanceStatistic } from "@/hooks/query/event/use-event-attendace-statistic";
 import { useParams } from "next/navigation";
-import BackButton from "@/components/back-button";
-import { eventSessionType, eventStatus } from "@/constant";
-import { Card } from "@/components/ui/card";
+import { useEffect } from "react";
 
 export default function Page() {
     const eventId = useParams().eventId as string;
-    const { eventDetails, isEventDetailsLoading } = useEventDetailsStore();
+    const { totalAttendees, totalStudents } = useEventStats();
+
     const {
-        data: eventAttendanceStatistic,
-        error,
-        isLoading,
-    } = useEventAttendanceStatistic(eventId);
+        eventDetails,
+        setEventDetails,
+        isEventDetailsLoading,
+        setIsEventDetailsLoading,
+    } = useEventDetailsStore();
 
-    const statistics = [
-        { name: "Total Attendees", value: 45 },
-        { name: "On Time", value: 38 },
-        { name: "Late", value: 7 },
-        { name: "Absent", value: 12 },
-    ];
-
+    const attendancePercentage = totalStudents
+        ? ((totalAttendees / totalStudents) * 100).toFixed(1)
+        : "0";
+        
     return (
         <div className="w-full">
             <Header title="Event Details">
@@ -53,38 +61,38 @@ export default function Page() {
                         </HeaderTitle>
                     </div>
                     <RoleBasedRender allowedRoles={["admin"]}>
-                    <div className="flex gap-2">
-                        <Link href={`/event/${eventDetails?.id}/scan`}>
-                            <Button variant="default" size="sm">
-                                Scan
-                            </Button>
-                        </Link>{" "}
-                        <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                                <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    aria-label="More options"
-                                >
-                                    <MoreHorizontal className="w-5 h-5" />
+                        <div className="flex gap-2">
+                            <Link href={`/event/${eventDetails?.id}/scan`}>
+                                <Button variant="default" size="sm">
+                                    Scan
                                 </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                                <DropdownMenuItem>
-                                    Edit
-                                    <DropdownMenuShortcut>
-                                        ⇧⌘E
-                                    </DropdownMenuShortcut>
-                                </DropdownMenuItem>
-                                <DropdownMenuItem className="text-destructive">
-                                    Delete
-                                    <DropdownMenuShortcut>
-                                        ⇧⌘D
-                                    </DropdownMenuShortcut>
-                                </DropdownMenuItem>
-                            </DropdownMenuContent>
-                        </DropdownMenu>
-                    </div>
+                            </Link>{" "}
+                            <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                    <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        aria-label="More options"
+                                    >
+                                        <MoreHorizontal className="w-5 h-5" />
+                                    </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end">
+                                    <DropdownMenuItem>
+                                        Edit
+                                        <DropdownMenuShortcut>
+                                            ⇧⌘E
+                                        </DropdownMenuShortcut>
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem className="text-destructive">
+                                        Delete
+                                        <DropdownMenuShortcut>
+                                            ⇧⌘D
+                                        </DropdownMenuShortcut>
+                                    </DropdownMenuItem>
+                                </DropdownMenuContent>
+                            </DropdownMenu>
+                        </div>
                     </RoleBasedRender>
                 </div>
             </Header>
@@ -101,14 +109,21 @@ export default function Page() {
                             <div className="flex-1 flex flex-col gap-4">
                                 <div className="flex flex-wrap items-center gap-2">
                                     {eventDetails.eventType && (
-                                        <Badge
-                                            variant="outline"
-                                        >
+                                        <Badge variant="outline">
                                             {eventDetails.eventType.name}
                                         </Badge>
                                     )}
                                     <Badge
                                         variant="outline"
+                                        className={`text-xs ${
+                                            eventStatusColor[
+                                                eventDetails.status
+                                            ].color
+                                        } ${
+                                            eventStatusColor[
+                                                eventDetails.status
+                                            ].bg
+                                        }`}
                                     >
                                         {eventStatus[eventDetails.status]}
                                     </Badge>
@@ -117,7 +132,7 @@ export default function Page() {
                                     {eventDetails.name}
                                 </h1>
 
-                                <div className="flex gap-3">
+                                <div className="flex gap-4">
                                     <div className="flex items-center gap-2 text-sm">
                                         <Calendar className="w-4 h-4 text-muted-foreground flex-shrink-0" />
                                         <p className="text-foreground">
@@ -127,7 +142,7 @@ export default function Page() {
                                             )}
                                         </p>
                                     </div>
-                                    <div className="flex items-center gap-3 text-sm">
+                                    <div className="flex items-center gap-2 text-sm">
                                         <MapPin className="w-4 h-4 text-muted-foreground flex-shrink-0" />
                                         <p className="text-foreground">
                                             {eventDetails.location ||
@@ -136,71 +151,93 @@ export default function Page() {
                                     </div>
                                 </div>
 
-                                {eventDetails.description && (
-                                    <p className="text-muted-foreground font-light leading-relaxed max-w-3xl">
+                                
+                            </div>{eventDetails.description && (
+                                    <p className="font-light leading-relaxed max-w-3xl">
                                         {eventDetails.description}
                                     </p>
                                 )}
-                            </div>
-                                {/* event sessions */}
+                            {/* event sessions */}
                             <div className="flex flex-col gap-2">
                                 <h2 className="text-lg font-light">
-                                    Event Sessions
+                                    Event Sessions <span className="text-muted-foreground">( {eventDetails.eventSessions.length} )</span>
                                 </h2>
-                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-2 md:gap-4">
                                     {eventDetails.eventSessions.map(
                                         (session, index) => (
                                             <Card
                                                 key={index}
+                                                className="flex-col gap-1 font-light"
                                             >
-                                                <div className="flex flex-col gap-2">
-                                                    <div className="flex w-full justify-between items-center">
-                                                        <h3 className="text-lg font-light">
-                                                            {
-                                                                eventSessionType[
-                                                                    session.type
-                                                                ]
-                                                            }
-                                                        </h3>
-                                                        <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                                                            <Clock className="h-3 w-3" />
-                                                            <span>
-                                                                {
-                                                                    session.startTime
-                                                                }{" "}
-                                                                –{" "}
-                                                                {
-                                                                    session.endTime
-                                                                }
-                                                            </span>
-                                                        </div>
+                                                <div className="text-base flex-1 flex justify-between">
+                                                    <h3 className=" font-light">
+                                                        {
+                                                            eventSessionType[
+                                                                session.type
+                                                            ]
+                                                        }
+                                                    </h3>
+                                                    <div className="flex items-center gap-1.5 font-light">
+                                                        <span>
+                                                            {session.startTime}{" "}
+                                                            - {session.endTime}
+                                                        </span>
                                                     </div>
-                                                    <div className="space-y-2">
-                                                        {session.gracePeriod && (
-                                                            <div className="flex items-center justify-between text-xs font-light">
-                                                                <span className="text-muted-foreground">
-                                                                    Grace Period
-                                                                </span>
-                                                                <span className="text-foreground">
+                                                </div>{" "}
+                                                <RoleBasedRender
+                                                    allowedRoles={["admin"]}
+                                                >
+                                                    {session.attendance.length >
+                                                        0 && (
+                                                        <div className="flex-1 text-sm flex justify-between">
+                                                            <h3 className="text-muted-foreground">
+                                                                Attendees
+                                                            </h3>
+                                                            <div className="flex gap-2">
+                                                                <span>
                                                                     {
-                                                                        session.gracePeriod
-                                                                    }{" "}
-                                                                    minutes
+                                                                        session
+                                                                            .attendance
+                                                                            .length
+                                                                    }
                                                                 </span>
+                                                                {totalStudents && (
+                                                                    <span>
+                                                                        (
+                                                                        {(
+                                                                            (session
+                                                                                .attendance
+                                                                                .length /
+                                                                                totalStudents) *
+                                                                            100
+                                                                        ).toFixed(
+                                                                            0
+                                                                        )}
+                                                                        %)
+                                                                    </span>
+                                                                )}
                                                             </div>
-                                                        )}
-                                                        <div className="flex items-center justify-between text-xs font-light">
-                                                            <span className="text-muted-foreground">
-                                                                Time Out
-                                                                Required
-                                                            </span>
-                                                            <span className="text-foreground">
-                                                                {session.requiresTimeOut
-                                                                    ? "Yes"
-                                                                    : "No"}
-                                                            </span>
                                                         </div>
-                                                    </div>
+                                                    )}
+                                                </RoleBasedRender>
+                                                <div className="flex-1 text-sm flex justify-between">
+                                                    <h3 className=" font-light text-muted-foreground">
+                                                        Time Out Required
+                                                    </h3>
+                                                    <span>
+                                                        {session.requiresTimeOut
+                                                            ? "Yes"
+                                                            : "No"}
+                                                    </span>
+                                                </div>
+                                                <div className="flex-1 text-sm flex justify-between">
+                                                    <h3 className=" font-light text-muted-foreground">
+                                                        Grace Period
+                                                    </h3>
+                                                    <span>
+                                                        {session.gracePeriod}{" "}
+                                                        mins
+                                                    </span>
                                                 </div>
                                             </Card>
                                         )
@@ -208,26 +245,44 @@ export default function Page() {
                                 </div>
                             </div>
                             <RoleBasedRender allowedRoles={["admin"]}>
-                                <div className="flex flex-col-reverse lg:flex-row gap-8">
-                                    <div className="flex-1">
-                                        <EventAttendanceList />
-                                    </div>
-                                    <div className="w-full lg:w-80">
-                                        <StatisticsCard
-                                            statistics={
-                                                eventAttendanceStatistic?.stats ||
-                                                statistics
-                                            }
-                                            title="Attendance Statistics"
-                                        />
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-2 md:gap-4">
+                                    {totalAttendees > 0 && (
+                                        <>
+                                            <div className="flex gap-4 items-center">
+                                                <div className="h-10 w-10 rounded-full bg-card flex items-center justify-center">
+                                                    <Users className="h-4 w-4 text-muted-foreground" />
+                                                </div>
+                                                <p className="font-light tracking-wide">
+                                                    {totalAttendees} Avg.
+                                                    Attendees
+                                                </p>
+                                            </div>
+                                            <div className="flex gap-4 items-center">
+                                                <div className="h-10 w-10 rounded-full bg-card flex items-center justify-center">
+                                                    <Target className="h-4 w-4 text-muted-foreground" />
+                                                </div>
+                                                <p className="font-light tracking-wide">
+                                                    {attendancePercentage}%
+                                                    Attendance Rate
+                                                </p>
+                                            </div>
+                                        </>
+                                    )}
+                                    <div className="flex gap-4 items-center">
+                                        <div className="h-10 w-10 rounded-full bg-card flex items-center justify-center">
+                                            <Heart className="h-4 w-4 text-muted-foreground fill-current" />
+                                        </div>
+                                        <p className="font-light tracking-wide">
+                                            95 Interested
+                                        </p>
                                     </div>
                                 </div>
                             </RoleBasedRender>
-                            <RoleBasedRender allowedRoles={["user"]}>
-                                <div className="">
-                                    you attendace of this event
+                            <div className="flex flex-col-reverse lg:flex-row gap-8">
+                                <div className="flex-1">
+                                    <EventAttendanceList />
                                 </div>
-                            </RoleBasedRender>
+                            </div>
                         </div>
                     )
                 )}

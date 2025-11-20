@@ -1,10 +1,8 @@
 import AdminDashboard from "./admin-dashboard";
-import DashboardPage from "./user-dashboard";
-
+import AdminAnalyticsDashboard from "./dashboard";
 export default function Dashboard() {
-    return (
-        <>
-            <AdminDashboard />
-        </>
-    );
+    return (<>
+    <AdminDashboard />
+    {/* <AdminAnalyticsDashboard/> */}
+    </>);
 }

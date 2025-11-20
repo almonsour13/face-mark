@@ -9,13 +9,10 @@ import UserFilter from "@/components/filter/user-filter";
 import { SidebarTriggerButton } from "@/components/layout/app-side-bar";
 import Header from "@/components/layout/nav-header";
 import HeaderTitle from "@/components/layout/nav-header-title";
+import LoadMoreWrapper from "@/components/load-more-wrapper";
 import PageWrapper from "@/components/page-wrapper";
 import { UsersCardSkeleton } from "@/components/skeleton-loader";
-import StatisticsCard from "@/components/statistics-card";
 import { useUrlFilter } from "@/hooks/use-url-filters";
-import { Button } from "@/components/ui/button";
-import { Loader2 } from "lucide-react";
-import LoadMoreWrapper from "@/components/load-more-wrapper";
 
 export default function Page() {
     const [nextCursor, setNextCursor] = useState<string | null>(null);
@@ -62,12 +59,6 @@ export default function Page() {
         }, 500);
     };
     
-    const statistics = [
-        { name: "Total Attendees", value: 45 },
-        { name: "On Time", value: 38 },
-        { name: "Late", value: 7 },
-        { name: "Absent", value: 12 },
-    ];
     return (
         <div className="w-full flex flex-col h-screen">
             <Header title="User">
@@ -107,12 +98,6 @@ export default function Page() {
                                 <p className="text-sm">No users found.</p>
                             </div>
                         )}
-                    </div>
-                    <div className="w-full lg:w-80">
-                        <StatisticsCard
-                            statistics={statistics}
-                            title="Attendance Statistics"
-                        />
                     </div>
                 </div>
             </PageWrapper>

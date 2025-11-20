@@ -19,7 +19,7 @@ export const useEventAttendance = ({
     nextCursor,
 }: useEventAttendanceProps) => {
     return useQuery<Response, Error>({
-        queryKey: ["eventAttendance", eventId, eventId, nextCursor],
+        queryKey: ["eventAttendance", eventId, nextCursor,filters],
         queryFn: async () => {
             const params = new URLSearchParams({
                 ...filters,
@@ -28,7 +28,6 @@ export const useEventAttendance = ({
             const response = await fetchApi<Response>(
                 `/api/event/${eventId}/attendance?${params.toString()}`
             );
-            console.log(response)
             return response;
         },
     });

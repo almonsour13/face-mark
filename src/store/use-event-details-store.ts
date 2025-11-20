@@ -1,16 +1,13 @@
 
 import { Event, EventType, Session } from "@/type";
 import { create } from "zustand";
+import { EventWithSessions } from "./use-event-store";
 
-export interface EventDetails extends Event{
-    eventSessions: Session[];
-    eventType:EventType
-}
 interface EventDetailsProps {
     isEventDetailsLoading: boolean;
     setIsEventDetailsLoading: (isLoading: boolean) => void;
-    eventDetails: EventDetails | null;
-    setEventDetails: (eventDEtails: EventDetails) => void;
+    eventDetails: EventWithSessions | null;
+    setEventDetails: (eventDEtails: EventWithSessions) => void;
 }
 
 export const useEventDetailsStore = create<EventDetailsProps>((set) => ({
@@ -26,6 +23,6 @@ export const useEventDetailsStore = create<EventDetailsProps>((set) => ({
             eventDetails: {
                 ...state.eventDetails,
                 ...updatedDetails,
-            } as EventDetails,
+            } as EventWithSessions,
         })),
 }));

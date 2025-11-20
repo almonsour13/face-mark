@@ -126,9 +126,32 @@ export const useCreateEvents = () => {
         updated[index].gracePeriod = Math.max(30, numValue);
         setEventSessions(updated);
     };
+    const isValid =
+        formData.name.trim() !== "" &&
+        formData.eventDate instanceof Date &&
+        eventSessions.length > 0 &&
+        eventSessions.every(
+            (session) =>
+                session.startTime.trim() !== "" && session.endTime.trim() !== ""
+        );
 
+    const isFormDirty =
+        formData.name.trim() !== "" ||
+        formData.description.trim() !== "" ||
+        formData.location.trim() !== "" ||
+        (eventSessions.length >= 1 &&
+            eventSessions.some(
+                (session) =>
+                    session.startTime.trim() !== "09:00 AM" || // or your default
+                    session.endTime.trim() !== "12:00 PM" ||
+                    session.requiresTimeOut !== 1 ||
+                    session.allowEarlyTimeIn !== 1 ||
+                    session.allowEarlyTimeOut !== 1 ||
+                    session.gracePeriod !== 30
+            ));
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        if(!isValid || !isFormDirty) return;
 
         const eventData = {
             ...formData,
@@ -175,7 +198,8 @@ export const useCreateEvents = () => {
     };
 
     const availableSessionTypes = getAvailableSessionTypes();
-
+    
+    
     return {
         open,
         setOpen,
@@ -196,5 +220,7 @@ export const useCreateEvents = () => {
         formatDate,
         availableSessionTypes,
         isCreateEventLoading,
+        isValid,
+        isFormDirty,
     };
 };

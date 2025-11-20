@@ -5,6 +5,7 @@ import { format } from "date-fns";
 import { UserAttendances } from "@/store/use-user-attendance-store";
 import { eventSessionType } from "@/constant";
 import { Card } from "../ui/card";
+import Link from "next/link";
 
 export default function UserAttendanceCard({
     attendance,
@@ -23,9 +24,12 @@ export default function UserAttendanceCard({
                 {/* Header */}
                 <div className="flex items-start justify-between gap-4">
                     <div className="flex-1 space-y-4">
-                        <h3 className="text-lg font-light text-foreground leading-tight">
-                            {attendance.event?.name}
-                        </h3>
+                        <Link
+                               href={`/event/${attendance.event.id}`}
+                                className="text-xl font-light text-foreground hover:text-muted-foreground transition-colors leading-tight group inline-flex items-center gap-2"
+                            >
+                                {attendance.event.name}
+                            </Link>
                         <div className="flex items-center gap-2 text-xs font-light text-muted-foreground">
                             <Calendar className="h-3 w-3" />
                             <span className="text-foreground">

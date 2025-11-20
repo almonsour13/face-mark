@@ -188,7 +188,7 @@ export default function UserAttendancesFilter() {
                     <DropdownMenuTrigger asChild>
                         <Button
                             variant="outline"
-                            className="bg-transparent flex-1 sm:flex-none"
+                            className="flex-1 sm:flex-none"
                         >
                             <ArrowUpDown className="w-4 h-4" />
                             Sort

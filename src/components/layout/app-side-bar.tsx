@@ -3,23 +3,21 @@
 import { roleValue } from "@/constant";
 import { useAppSidebar } from "@/context/app-sidebar-context";
 import {
-    Menu,
-    Moon,
-    Scan,
-    Sun,
-    ToggleLeft,
     CalendarDays,
     CheckSquare,
     Home,
     LayoutDashboard,
-    Users,
+    Menu,
+    Moon,
     Settings,
+    Sun,
+    Users
 } from "lucide-react";
 import { signOut, useSession } from "next-auth/react";
+import { useTheme } from "next-themes";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Button } from "../ui/button";
-import { useTheme } from "next-themes";
 
 export default function AppSidebar() {
     const { data: session, status } = useSession();
@@ -87,11 +85,11 @@ export default function AppSidebar() {
             <div
                 className={`
                         flex flex-col w-0 transition-all duration-300 
-                        ${open ? "lg:w-64" : "w-0"}`}
+                        ${open ? "md:w-0" : "w-0 lg:w-64"}`}
             >
                 <div
                     className={`w-72 lg:w-64 border-r min-h-screen fixed z-40 bg-background flex flex-col transition-transform duration-300 ${
-                        open ? "translate-x-0" : "-translate-x-full"
+                        open ? "md:-translate-x-full" : "-translate-x-full lg:translate-x-0"
                     }`}
                 >
                     <div className="h-14 border-b px-6 flex items-center gap-3">

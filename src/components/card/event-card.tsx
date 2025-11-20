@@ -14,6 +14,7 @@ import {
     Calendar,
     Check,
     CheckCircle,
+    CheckCircle2,
     Clock,
     Clock4,
     Dot,
@@ -26,91 +27,116 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import RoleBasedRender from "../role-based-render";
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import { EventWithSessions } from "@/store/use-event-store";
-import { eventSessionType, eventStatus } from "@/constant";
+import { eventSessionType, eventStatus, eventStatusColor } from "@/constant";
 import { Card } from "../ui/card";
 
-export function EventCard({ event, index }: { event: EventWithSessions, index?:number }) {
-    const [interseted, setInterseted] = useState(false);
+export function EventCard({
+    event,
+    totalStudents,
+}: {
+    event: EventWithSessions;
+    totalStudents: number;
+}) {
+    const [interested, setInterested] = useState(false);
+    const [isPending, startTransition] = useTransition();
 
-    const handleInterseted = (e: React.MouseEvent<HTMLButtonElement>) => {
+    const handleInterested = (e: React.MouseEvent<HTMLButtonElement>) => {
         e.preventDefault();
-        setInterseted(!interseted);
+        startTransition(() => {
+            setInterested(!interested);
+        });
     };
+
+    const totalAttendees = Math.round(
+        event.eventSessions.reduce(
+            (total, session) => total + session.attendance.length,
+            0
+        ) / event.eventSessions.length
+    );
+
     return (
         <Link
             key={event.id}
             href={`/event/${event.id}`}
-            className="break-inside-avoid block mb-4"
+            className="break-inside-avoid block mb-4a"
         >
-            <Card className="flex flex-col gap-4">
+            <Card className={`h-full flex flex-col gap-4`}>
                 <div className="flex flex-col gap-3">
-                    <div className="w-full flex items-start justify-between gap-4">
-                        <h2 className="text-xl font-normal text-foreground leading-tight flex-1">
-                            {event.name}
-                        </h2>
-                        <div className="flex items-center gap-2 shrink-0">
-                            <Badge
-                                variant="outline"
-                                className="text-xs"
-                            >
-                                {eventStatus[event.status]}
-                            </Badge>
-                            <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                    <Button
-                                        role="button"
-                                        aria-label="More"
-                                        variant="ghost"
-                                        size="icon-sm"
+                    <div className="w-full flex flex-col gap-1">
+                        <div className="flex gap-2 justify-between items-center">
+                            <div className="flex gap-2">
+                                {event.eventType && (
+                                    <Badge
+                                        variant="outline"
+                                        className="text-xs font-light"
+                                    >
+                                        {event.eventType.name}
+                                    </Badge>
+                                )}
+                                <Badge
+                                    variant="outline"
+                                    className={`text-xs font-light ${
+                                        eventStatusColor[event.status].color
+                                    } ${eventStatusColor[event.status].bg}`}
+                                >
+                                    {eventStatus[event.status]}
+                                </Badge>
+                            </div>
+                            <div className="flex items-center gap-2 shrink-0">
+                                <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                        <Button
+                                            role="button"
+                                            aria-label="More"
+                                            variant="ghost"
+                                            size="icon-sm"
+                                            onClick={(e) => {
+                                                e.preventDefault();
+                                                e.stopPropagation();
+                                            }}
+                                        >
+                                            <MoreHorizontal className="w-4 h-4" />
+                                        </Button>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent
                                         onClick={(e) => {
                                             e.preventDefault();
                                             e.stopPropagation();
                                         }}
                                     >
-                                        <MoreHorizontal className="w-4 h-4" />
-                                    </Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent
-                                    onClick={(e) => {
-                                        e.preventDefault();
-                                        e.stopPropagation();
-                                    }}
-                                >
-                                    <DropdownMenuItem>
-                                        View Details
-                                        <DropdownMenuShortcut>
-                                            ⇧⌘P
-                                        </DropdownMenuShortcut>
-                                    </DropdownMenuItem>
-                                    <RoleBasedRender allowedRoles={["admin"]}>
                                         <DropdownMenuItem>
-                                            Edit
+                                            View Details
                                             <DropdownMenuShortcut>
                                                 ⇧⌘P
                                             </DropdownMenuShortcut>
                                         </DropdownMenuItem>
-                                        <DropdownMenuItem>
-                                            Delete
-                                            <DropdownMenuShortcut>
-                                                ⇧⌘P
-                                            </DropdownMenuShortcut>
-                                        </DropdownMenuItem>
-                                    </RoleBasedRender>
-                                </DropdownMenuContent>
-                            </DropdownMenu>
+                                        <RoleBasedRender
+                                            allowedRoles={["admin"]}
+                                        >
+                                            <DropdownMenuItem>
+                                                Edit
+                                                <DropdownMenuShortcut>
+                                                    ⇧⌘P
+                                                </DropdownMenuShortcut>
+                                            </DropdownMenuItem>
+                                            <DropdownMenuItem>
+                                                Delete
+                                                <DropdownMenuShortcut>
+                                                    ⇧⌘P
+                                                </DropdownMenuShortcut>
+                                            </DropdownMenuItem>
+                                        </RoleBasedRender>
+                                    </DropdownMenuContent>
+                                </DropdownMenu>
+                            </div>
                         </div>
+                        <h2 className="text-xl font-light text-foreground leading-tight">
+                            {event.name}
+                        </h2>
                     </div>
                     <div className="flex flex-wrap gap-4 text-xs text-muted-foreground font-light">
-                        {event.eventType && (
-                                <Badge
-                                    variant="outline"
-                                    className="text-xs"
-                                >
-                                    {event.eventType.name}
-                                </Badge>
-                            )}
                         <div className="flex items-center gap-2">
                             <Calendar className="w-4 h-4 shrink-0" />
                             <span className="text-foreground font-light">
@@ -132,95 +158,99 @@ export function EventCard({ event, index }: { event: EventWithSessions, index?:n
                 )}
                 <div className="flex flex-col gap-2">
                     {event.eventSessions.map((session, index) => (
-                        <div
+                        <Card
                             key={index}
-                            className="px-3 py-2 rounded bg-green-600/10s flex items-center justify-between text-xs border border-border/50 bg-muted/20"
+                            className="px-3 py-2 rounded flex-row justify-between text-xs"
                         >
                             <span className="font-light text-foreground">
                                 {eventSessionType[session.type]}
                             </span>
-                            <RoleBasedRender allowedRoles={["admin"]}>
-                                <div className="flex gap-2">
-                                    {/* in */}
-                                    <div className="flex items-center gap-2">
-                                        <ArrowRightFromLine className="h-3 w-3 text-green-600 dark:text-green-400" />
-                                        <span className="text-foreground">
-                                            100
-                                        </span>
-                                    </div>
-                                    <span className="text-muted-foreground">
-                                        |
-                                    </span>
-                                    {/* out */}
-                                    <div className="flex items-center gap-2">
-                                        <ArrowLeftFromLine className="h-3 w-3 text-orange-600" />
-                                        <span className="text-foreground">
-                                            95
-                                        </span>
-                                    </div>
-                                </div>
-                            </RoleBasedRender>
-                            <div className="flex items-center gap-2">
-                                <div className="flex items-center gap-1 text-muted-foreground">
-                                    <Clock className="w-3 h-3" />
-                                    <span>
+                            <div className="flex gap-4">
+                                <div className="flex items-center gap-2">
+                                    <Clock className="w-3 h-3 text-muted-foreground" />
+                                    <span className="text-foreground">
                                         {session.startTime} ~ {session.endTime}
                                     </span>
                                 </div>
-                                <CheckCircle className="w-3 h-3 text-green-600" />
+                                {(event.status === 3 || event.status === 4) && (
+                                    <RoleBasedRender allowedRoles={["admin"]}>
+                                        <div className="flex items-center gap-2">
+                                            <Users className="h-3 w-3 text-muted-foreground" />
+                                            <span className="text-foreground">
+                                                {session.attendance.length}
+                                            </span>
+                                            <span className="text-foreground">
+                                                (
+                                                {(
+                                                    (session.attendance.length /
+                                                        totalStudents) *
+                                                    100
+                                                ).toFixed(0)}
+                                                %)
+                                            </span>
+                                            {session.attendance.length > 0 && (
+                                                <CheckCircle2 className="w-3.5 h-3.5 text-green-600 dark:text-green-400" />
+                                            )}
+                                        </div>
+                                    </RoleBasedRender>
+                                )}
                             </div>
-                        </div>
+                        </Card>
                     ))}
                 </div>
-                <div className="">
-                    <RoleBasedRender allowedRoles={["user", ""]}>
-                        <div className="flex items-center justify-between">
-                            <span className="text-sm font-light text-muted-foraeground">
-                                Interested in this event?
+                <RoleBasedRender allowedRoles={["user", ""]}>
+                    <div className="flex items-center justify-between pt-2 border-border/50 border-t">
+                        <span className="text-sm font-light text-muted-foraeground">
+                            Interested in this event?
+                        </span>
+                        <div className="flex  items-center gap-2">
+                            <span className="text-xs font-light text-muted-foraeground">
+                                95
                             </span>
-                            <div className="flex  items-center gap-2">
-                                <span className="text-xs font-light text-muted-foraeground">
-                                    95
-                                </span>
-                                <Button
-                                    variant="ghost"
-                                    size="icon-sm"
-                                    className="p-0.5"
-                                    onClick={handleInterseted}
-                                >
-                                    <Heart
-                                        className={`${
-                                            interseted && "fill-current"
-                                        }`}
-                                    />
-                                </Button>
-                            </div>
+                            <Button
+                                variant="ghost"
+                                size="icon-sm"
+                                className="p-0.5"
+                                onClick={handleInterested}
+                            >
+                                <Heart
+                                    className={`${
+                                        interested && "fill-current"
+                                    }`}
+                                />
+                            </Button>
                         </div>
-                    </RoleBasedRender>
+                    </div>
+                </RoleBasedRender>
+                {event.status === 4 && (
                     <RoleBasedRender allowedRoles={["admin"]}>
-                        <div className="flex items-center justify-between gap-4 text-xs font-light">
+                        <div className="flex items-center justify-between gap-4 text-xs font-light border-t pt-2 border-border/50">
                             <div className="flex items-center gap-2">
                                 <Users className="h-3 w-3 text-muted-foreground" />
                                 <span className="text-foreground">
-                                    100 attendees
+                                    {totalAttendees} avg. attendees
                                 </span>
                             </div>
                             <div className="flex items-center gap-2">
-                                <Target className="h-3 w-3 text-green-600 dark:text-green-400" />
-                                <span className="text-green-600 dark:text-green-400">
-                                    95% attendance
+                                <Target className="h-3 w-3 " />
+                                <span>
+                                    {(
+                                        (totalAttendees / totalStudents) *
+                                        100
+                                    ).toFixed(0)}
+                                    % attendance
                                 </span>
                             </div>
 
-                            <div className="flex items-center gap-2">
+                            {/* <div className="flex items-center gap-2">
                                 <Heart className="h-3 w-3 fill-current" />
                                 <span className="text-foreground">
                                     95 Interested
                                 </span>
-                            </div>
+                            </div> */}
                         </div>
                     </RoleBasedRender>
-                </div>
+                )}
             </Card>
         </Link>
     );

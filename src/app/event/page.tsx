@@ -20,15 +20,18 @@ import {
     EmptyTitle,
 } from "@/components/ui/empty";
 import { useEvents } from "@/hooks/query/event/use-events";
+import useResponsiveEventGrid from "@/hooks/use-responsive-event-grid";
 import { useUrlFilter } from "@/hooks/use-url-filters";
-import { useEventStore } from "@/store/use-event-store";
+import { EventWithSessions, useEventStore } from "@/store/use-event-store";
 import { Loader2 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
 export default function AdminEventPage() {
+    const [isSortAsPriority, setIsSortAsPriority] = useState(true);
     const [nextCursor, setNextCursor] = useState<string | null>(null);
     const [hasMore, setHasMore] = useState(false);
     const [isLoadingMore, setIsLoadingMore] = useState(false);
+    const [totalStudents, setTotalStudents] = useState(0);
 
     const {
         events,
@@ -61,9 +64,12 @@ export default function AdminEventPage() {
         } else {
             addMoreEvents(eventsData.events);
         }
+        if (eventsData.totalStudents) {
+            setTotalStudents(eventsData.totalStudents);
+        }
         setHasMore(eventsData.hasMore || false);
         setIsLoadingMore(false);
-    }, [eventsData, nextCursor, setEvents, setIsEventsLoading, addMoreEvents]);
+    }, [eventsData, nextCursor, setEvents, setIsEventsLoading, addMoreEvents, setTotalStudents]);
 
     const handleLoadMore = () => {
         if (!eventsData?.hasMore || isLoadingMore) {
@@ -75,6 +81,8 @@ export default function AdminEventPage() {
             setNextCursor(eventsData.nextCursor);
         }, 500);
     };
+
+    const { column1, column2, column3 } = useResponsiveEventGrid(events);
 
     return (
         <div className="w-full min-h-screen flex flex-col flex-1">
@@ -95,13 +103,13 @@ export default function AdminEventPage() {
                     <EventsCardSkeleton />
                 ) : events.length > 0 ? (
                     <>
-                        <LoadMoreWrapper
+                        {/* <LoadMoreWrapper
                             hasMore={hasMore}
                             isLoading={isLoadingMore}
                             loadMore={handleLoadMore}
                             loadingStateMessage="loading more events..."
                         >
-                            <div className="columns-1 sm:columns-2 lg:columns-3 gap-4">
+                            <div className="columns-1 sm:columns-2 lg:columns-3 gap-4 ">
                                 {events.map((event, index) => (
                                     <EventCard
                                         key={event.id}
@@ -109,6 +117,34 @@ export default function AdminEventPage() {
                                         index={index}
                                     />
                                 ))}
+                            </div>
+                        </LoadMoreWrapper> */}
+                        <LoadMoreWrapper
+                            hasMore={hasMore}
+                            isLoading={isLoadingMore}
+                            loadMore={handleLoadMore}
+                            loadingStateMessage="loading more events..."
+                        >
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                                {[column1, column2, column3].map(
+                                    (col, idx) =>
+                                        col.length > 0 && (
+                                            <div
+                                                key={idx}
+                                                className="flex flex-col gap-4"
+                                            >
+                                                {col.map((event) => (
+                                                    <EventCard
+                                                        key={event.id}
+                                                        event={event}
+                                                        totalStudents={
+                                                            totalStudents
+                                                        }
+                                                    />
+                                                ))}
+                                            </div>
+                                        )
+                                )}
                             </div>
                         </LoadMoreWrapper>
                     </>

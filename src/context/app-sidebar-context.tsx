@@ -24,7 +24,7 @@ interface AppSidebarProviderProps {
 }
 
 export const AppSidebarProvider = ({ children }: AppSidebarProviderProps) => {
-    const [open, setOpen] = useState(true);
+    const [open, setOpen] = useState(false);
 
     const toggleSidebar = useCallback(() => setOpen((prev) => !prev), []);
     const openSidebar = useCallback(() => setOpen(true), []);

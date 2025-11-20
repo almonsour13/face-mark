@@ -19,7 +19,8 @@ import { sortBy } from "@/constant";
 import { useCourses } from "@/hooks/query/use-courses";
 import { useLevel } from "@/hooks/query/use-level";
 import { useUrlFilter } from "@/hooks/use-url-filters";
-import { ArrowUpDown, ListFilter } from "lucide-react";
+import { ArrowUpDown, ListFilter, Plus } from "lucide-react";
+import CreateUserDialog from "../dialog/create-user-dialog";
 
 export default function UserFilter() {
     const { data: courseData, isPending: isCoursesPending } = useCourses();
@@ -163,7 +164,7 @@ export default function UserFilter() {
                     <DropdownMenuTrigger asChild>
                         <Button
                             variant="outline"
-                            className="bg-transparent flex-1 sm:flex-none"
+                            className="flex-1 sm:flex-none"
                         >
                             <ArrowUpDown className="w-4 h-4" />
                             Sort
@@ -185,7 +186,10 @@ export default function UserFilter() {
                     </DropdownMenuContent>
                 </DropdownMenu>
                 {/* ➕ Add User Button */}
-                <Button>Add User</Button>
+                <CreateUserDialog>
+                    
+                <Button><Plus /> User</Button>
+                </CreateUserDialog>
             </div>
         </div>
     );

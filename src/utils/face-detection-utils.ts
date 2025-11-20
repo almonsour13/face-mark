@@ -1,4 +1,4 @@
-import { AttendanceStatus } from "@/components/detect/detect-parent-panel";
+import { AttendanceStatus } from "@/components/features/scan/detect-parent-panel";
 import { Face } from "@/store/use-faces-store";
 import * as faceapi from "face-api.js";
 

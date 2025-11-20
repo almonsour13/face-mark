@@ -1,9 +1,10 @@
-import { Event, EventType, Session } from "@/type";
+import { Attendance, Event, EventType, Session } from "@/type";
 import { create } from "zustand";
 
 export interface EventWithSessions extends Event {
-    eventSessions: Session[];
+    eventSessions: (Session & { attendance: Attendance[] })[];
     eventType: EventType;
+    attendance: number;
 }
 interface EventStore {
     isEventsLoading: boolean;
