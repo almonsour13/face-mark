@@ -50,13 +50,13 @@ export default function HowItWorks() {
             >
                 {workflowSteps.map((step, index) => (
                     <motion.div
+                        key={index}
                         initial={{ opacity: 0, y: 30 }}
                         whileInView={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.6, delay: index * 0.15 }}
                         viewport={{ once: true, amount: 0.3 }}
                     >
                         <Card
-                            key={index}
                             className="h-full relative p-6 rounded-2xl group overflow-hidden border-0"
                         >
                             {/* Gradient Background */}

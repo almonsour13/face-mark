@@ -10,11 +10,21 @@ import {
     LayoutDashboard,
     ScanFace,
 } from "lucide-react";
-import SectionWrapper from "../section-wrapper";
-import { use, useEffect, useState } from "react";
 import Image from "next/image";
+import { useEffect, useState } from "react";
+import SectionWrapper from "../section-wrapper";
+import {
+    Sheet,
+    SheetContent,
+    SheetDescription,
+    SheetHeader,
+    SheetTitle,
+} from "@/components/ui/sheet";
 
 export default function ScreenShot() {
+    const [selectedScreenshotIndex, setSelectedScreenshotIndex] = useState(0);
+    const [currentImageIndex, setCurrentImageIndex] = useState(0);
+
     const screenshot = [
         {
             title: "Home",
@@ -72,6 +82,29 @@ export default function ScreenShot() {
             images: ["/images/homepage/screenshots/attendance-1.png"],
         },
     ];
+
+    const selectedScreenshot = screenshot[selectedScreenshotIndex - 1];
+
+    // Auto-rotate images in the sheet
+    useEffect(() => {
+        if (selectedScreenshot && selectedScreenshot.images.length <= 1) return;
+
+        const interval = setInterval(() => {
+            if (!selectedScreenshot) return;
+
+            setCurrentImageIndex(
+                (prev) => (prev + 1) % selectedScreenshot.images.length
+            );
+        }, 5000);
+
+        return () => clearInterval(interval);
+    }, [selectedScreenshot]);
+
+    useEffect(() => {
+        if (selectedScreenshotIndex === 0) {
+            setCurrentImageIndex(0);
+        }
+    }, [selectedScreenshotIndex]);
     return (
         <SectionWrapper>
             <div className="text-left space-y-3 mb-16">
@@ -86,13 +119,124 @@ export default function ScreenShot() {
             </div>
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {screenshot.map((item, index) => (
-                    <ScreenShotCard key={index} index={index} item={item} />
+                    <ScreenShotCard
+                        key={index}
+                        index={index}
+                        item={item}
+                        setSelectedScreenshotIndex={setSelectedScreenshotIndex}
+                    />
                 ))}
             </div>
+            <Sheet
+                open={selectedScreenshotIndex !== 0}
+                onOpenChange={(open) => {
+                    if (!open) setSelectedScreenshotIndex(0);
+                }}
+            >
+                <SheetContent
+                    side="bottom"
+                    className="w-full h-[90vh] rounded-t-3xl"
+                >
+                    {selectedScreenshot && (
+                        <div className="max-w-4xl w-full mx-auto h-full flex flex-col items-start py-12 p-6 md:p-8 gap-6">
+                            <div className="flex flex-col">
+                                <div className="flex items-start gap-4">
+                                    <div
+                                        className={`h-14 w-14 rounded-xl ${selectedScreenshot.color} flex items-center justify-center flex-shrink-0`}
+                                    >
+                                        <selectedScreenshot.icon
+                                            className={`h-7 w-7`}
+                                        />
+                                    </div>
+                                    <div className="flex-1">
+                                        <SheetTitle className="text-2xl font-normal">
+                                            {selectedScreenshot.title}
+                                        </SheetTitle>
+                                        <SheetDescription className="text-base">
+                                            {selectedScreenshot.description}
+                                        </SheetDescription>
+                                    </div>
+                                </div>
+                            </div>
+                            {/* <div className="relative overflow-auto rounded-md flex items-center justify-center"> */}
+                                <div className="relative rounded-lg overflow-hidden border-4 border-zinc-900">
+                                    {selectedScreenshot.images.map(
+                                        (img: string, imgIndex: number) => (
+                                            <Image
+                                                key={imgIndex}
+                                                src={img}
+                                                alt={
+                                                    selectedScreenshot.title +
+                                                    " screenshot"
+                                                }
+                                                width={1600}
+                                                height={1600}
+                                                className={`transition-opacity duration-900 ${
+                                                    imgIndex ===
+                                                    currentImageIndex
+                                                        ? "opacity-100"
+                                                        : "opacity-0 absolute inset-0"
+                                                }`}
+                                            />
+                                        )
+                                    )}
+                                </div>
+                            {/* </div> */}
+                            {selectedScreenshot &&
+                                selectedScreenshot.images.length > 1 && (
+                                    <div className="flex gap-4 items-center">
+                                        {selectedScreenshot.images.map(
+                                            (_, imgIndex: number) => (
+                                                <div
+                                                    key={imgIndex}
+                                                    className={`cursor-pointer w-35 rounded overflow-hidden ${
+                                                        imgIndex ===
+                                                        currentImageIndex
+                                                            ? "ring-4 ring-primary"
+                                                            : "bg-muted"
+                                                    }`}
+                                                    onClick={() => {
+                                                        setCurrentImageIndex(
+                                                            imgIndex
+                                                        );
+                                                    }}
+                                                >
+                                                    <Image
+                                                        src={
+                                                            selectedScreenshot
+                                                                .images[
+                                                                imgIndex
+                                                            ]
+                                                        }
+                                                        width={400}
+                                                        height={400}
+                                                        alt={
+                                                            selectedScreenshot.title +
+                                                            " screenshot"
+                                                        }
+                                                    />
+                                                </div>
+                                            )
+                                        )}
+                                    </div>
+                                )}
+                        </div>
+                    )}
+                </SheetContent>
+            </Sheet>
         </SectionWrapper>
     );
 }
-const ScreenShotCard = ({ index, item }: { index: number; item: any }) => {
+
+const ScreenShotCard = ({
+    index,
+    item,
+    setSelectedScreenshotIndex,
+}: {
+    index: number;
+    item: any;
+    setSelectedScreenshotIndex: (index: number) => void;
+}) => {
     const [currentIndex, setCurrentIndex] = useState(0);
 
     useEffect(() => {
@@ -105,6 +249,10 @@ const ScreenShotCard = ({ index, item }: { index: number; item: any }) => {
         return () => clearInterval(interval);
     }, [item.images.length]);
 
+    const handleClick = () => {
+        setSelectedScreenshotIndex(index + 1);
+    };
+
     return (
         <motion.div
             key={index}
@@ -112,10 +260,11 @@ const ScreenShotCard = ({ index, item }: { index: number; item: any }) => {
             whileInView={{ opacity: 1, scale: 1 }}
             viewport={{ once: true, amount: 0.3 }}
             transition={{ duration: 0.6, delay: index * 0.15 }}
+            onClick={handleClick}
         >
-            <Card className="p-6 border-0 relative overflow-hidden  rounded-2xl space-y-4 group transition-all hover:opacity-80 duration-300">
+            <Card className="p-6 border-0 relative overflow-hidden rounded-2xl space-y-4 group transition-all hover:opacity-80 duration-300 cursor-pointer">
                 <div className={`absolute inset-0 h-full ${item.color}`} />
-                <div className="flex flex-col gap-4 z-10 cursor-pointer">
+                <div className="flex flex-col gap-4 z-10 relative">
                     <div className="flex items-center justify-between">
                         <div className="space-y-1">
                             <h3 className="text-xl font-normal">
@@ -130,35 +279,33 @@ const ScreenShotCard = ({ index, item }: { index: number; item: any }) => {
                         </Button>
                     </div>
                     {/* mocked image holder */}
-                    <div className="relative flex-col border-2 border-zinc-900 items-start h-50 md:h-48 asapect-video overflow-hidden bg-muted rounded-md flex justify-center">
+                    <div className="relative flex-col border-2 border-zinc-900 items-start h-50 md:h-48 aspect-video overflow-hidden bg-muted rounded-md flex justify-center">
                         <div className="flex items-center gap-1 h-3 ml-1">
                             <div className="h-1 w-1 rounded-full bg-red-500" />
                             <div className="h-1 w-1 rounded-full bg-yellow-500" />
                             <div className="h-1 w-1 rounded-full bg-green-500" />
                         </div>
                         <div className="relative flex-1 h-full w-full flex items-center justify-center">
-                            <AnimatePresence mode="wait">
-                                {item.images.map(
-                                    (img: string, imgIndex: number) => (
-                                        <div
-                                            key={imgIndex}
-                                            className={`absolute inset-0 transition-opacity duration-500 ${
-                                                imgIndex === currentIndex
-                                                    ? "opacity-100"
-                                                    : "opacity-0"
-                                            }`}
-                                        >
-                                            <Image
-                                                src={img}
-                                                alt={item.title + " screenshot"}
-                                                width={800}
-                                                height={800}
-                                                className="object-contain"
-                                            />
-                                        </div>
-                                    )
-                                )}
-                            </AnimatePresence>
+                            {item.images.map(
+                                (img: string, imgIndex: number) => (
+                                    <div
+                                        key={imgIndex}
+                                        className={`absolute inset-0 transition-opacity duration-500 ${
+                                            imgIndex === currentIndex
+                                                ? "opacity-100"
+                                                : "opacity-0"
+                                        }`}
+                                    >
+                                        <Image
+                                            src={img}
+                                            alt={item.title + " screenshot"}
+                                            width={800}
+                                            height={800}
+                                            className="object-contain"
+                                        />
+                                    </div>
+                                )
+                            )}
                         </div>
                     </div>
                 </div>

@@ -136,21 +136,23 @@ export default function Hero() {
         <SectionWrapper className="min-h-screen">
             <div className="h-16" />
 
-            <div className="flex flex-col gap-16">
+            <div className="flex flex-col gap-16 md:gap-20">
                 <div className="flex flex-col md:flex-row  gap-12">
-                    <div className="space-y-6 flex-1">
-                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-border/30 text-xs font-light uppercase tracking-wide text-muted-foreground">
-                            <Sparkles className="h-3 w-3" />
-                            AI-Powered Attendance
-                        </div>
+                    {/* Left Content */}
+                    <motion.div
+                        className="space-y-4 flex-1"
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ duration: 0.6 }}
+                    >
 
-                        <h1 className="text-5xl lg:text-7xl font-semibold max-w-3xl">
-                            Attendance tracking
-                            <span className="block text-muted-foreground">
-                                reimagined
+                        <h1 className="text-5xl lg:text-7xl font-semibold max-w-3xl leading-tight">
+                            Attendance Tracking
+                            <span className="block text-primary">
+                                Reimagined
                             </span>
                         </h1>
-                        <Card className="md:col-span-2 border-0 p-0 rounded-2xl bg-transparent hover:bg-transparent space-y-6">
+                        <Card className="md:col-span-2 border-0 p-0 rounded-2xl bg-transparent hover:bg-transparent space-y-4">
                             <p className="text-lg text-muted-foreground font-light">
                                 Facial recognition technology meets elegant
                                 design. Automate attendance, prevent fraud, and
@@ -166,20 +168,30 @@ export default function Hero() {
                                 </Link>
                             </div>
                         </Card>
-                    </div>
+                        {/* </div> */}
+                    </motion.div>
                     <div className="mb-12 md:mb-0  flex-1 flex items-start relative">
-                        {/* Masked image */}
-                        <div className="w-full relative mask-herao max-w-xl rounded-xl overflow-hidden">
-                            <Image
-                                alt="banner image"
-                                src={"/images/homepage/avatars/scan-people-v2.png"}
-                                width={1000}
-                                height={1000}
-                                className="object-contain h-full"
-                            />
-                        </div>
+                        <motion.div
+                            className="flex-1"
+                            initial={{ opacity: 0, x: 20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ duration: 0.6 }}
+                        >
+                            {/* Masked image */}
+                            <div className="w-full relative mask-herao max-w-xl rounded-xl overflow-hidden">
+                                <Image
+                                    alt="banner image"
+                                    src={
+                                        "/images/homepage/avatars/scan-people-v2.png"
+                                    }
+                                    width={1000}
+                                    height={1000}
+                                    className="object-contain h-full"
+                                />
+                            </div>
 
-                        {/* Rotating attendance display */}
+                            {/* Rotating attendance display */}
+                        </motion.div>
                         <div className="absolute right-0 left-0 -bottom-12 md:right-0 md:bottom-0 flex items-center justify-center md:justify-end  ">
                             <AnimatePresence mode="wait">
                                 <motion.div

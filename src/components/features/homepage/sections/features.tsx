@@ -75,6 +75,7 @@ export default function Features() {
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {features.map((feature, index) => (
                     <motion.div
+                        key={index}
                         initial={{ opacity: 0, scale: 0.95 }}
                         whileInView={{ opacity: 1, scale: 1 }}
                         viewport={{ once: true, amount: 0.3 }}

@@ -47,20 +47,16 @@ export default function UseCases() {
             <div className="grid md:grid-cols-3 gap-6">
                 {useCases.map((useCase, index) => (
                     <motion.div
+                        key={index}
                         initial={{ opacity: 0, y: 30 }}
                         whileInView={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.6, delay: index * 0.15 }}
                         viewport={{ once: true, amount: 0.3 }}
                     >
-                        <Card
-                            key={index}
-                            className="p-0 h-66 border-0 rounded-2xl relative overflow-hidden transition-all group"
-                        >
-                            <div
-                                className={`p-6 z-10 flex items-end h-full`}
-                            >
-                                <div className="space-y-2">
-                                    <h3 className="text-xl">{useCase.title}</h3>
+                        <Card className="p-0 h-66a aspect-square border-0 rounded-2xl relative overflow-hidden transition-all group">
+                            <div className={`p-6 z-10 flex items-end h-full`}>
+                                <div className="space-y-2 text-white">
+                                    <h3 className="text-2xl font-light">{useCase.title}</h3>
                                     <p className="text-sm font-light">
                                         {useCase.description}
                                     </p>
@@ -74,7 +70,7 @@ export default function UseCases() {
                                     className="object-cover transition-transform duration-500 group-hover:scale-110"
                                 />
                                 {/* Overlay Gradient */}
-                                <div className="absolute inset-0 bg-gradient-to-t from-background via-background/80 to-transparent" />
+                                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent" />
                             </div>
                             <div className="absolute inset-0 bg-primary/0 group-hover:bg-primary/5 transition-colors duration-300 pointer-events-none" />
                         </Card>
